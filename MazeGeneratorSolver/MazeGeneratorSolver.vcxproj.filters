@@ -14,6 +14,9 @@
     <Filter Include="Libs\glfw">
       <UniqueIdentifier>{15bf9f45-b7b6-44c7-9026-6915d15c959d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Files\Application">
+      <UniqueIdentifier>{af0b44f9-c937-4b8b-8477-a2d639179442}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MazeGeneratorSolver.cpp">
@@ -21,6 +24,9 @@
     </ClCompile>
     <ClCompile Include="Libs\glad\src\glad.c">
       <Filter>Libs\glad</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Files\Application</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -35,6 +41,12 @@
     </ClInclude>
     <ClInclude Include="Libs\glad\include\glad\glad.h">
       <Filter>Libs\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings.h">
+      <Filter>Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -129,14 +129,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application.cpp" />
     <ClCompile Include="Libs\glad\src\glad.c" />
     <ClCompile Include="MazeGeneratorSolver.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application.h" />
     <ClInclude Include="Libs\glad\include\glad\glad.h" />
     <ClInclude Include="Libs\glad\include\KHR\khrplatform.h" />
     <ClInclude Include="Libs\GLFW\glfw3.h" />
     <ClInclude Include="Libs\GLFW\glfw3native.h" />
+    <ClInclude Include="Settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

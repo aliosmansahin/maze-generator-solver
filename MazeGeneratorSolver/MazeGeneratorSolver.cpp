@@ -1,6 +1,10 @@
-#include <iostream>
+#include "Settings.h"
+#include "Application.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    Application app;
+    app.Initialize();
+    app.Run();
+    return 0;
 }
