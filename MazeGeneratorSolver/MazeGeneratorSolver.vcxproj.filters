@@ -5,10 +5,36 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Libs">
+      <UniqueIdentifier>{5d323b84-e99b-4f1e-9222-787f93304eca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\glad">
+      <UniqueIdentifier>{e4998130-0bf4-49c4-8f55-fc83078931ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\glfw">
+      <UniqueIdentifier>{15bf9f45-b7b6-44c7-9026-6915d15c959d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MazeGeneratorSolver.cpp">
       <Filter>Files</Filter>
     </ClCompile>
+    <ClCompile Include="Libs\glad\src\glad.c">
+      <Filter>Libs\glad</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Libs\GLFW\glfw3.h">
+      <Filter>Libs\glfw</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\GLFW\glfw3native.h">
+      <Filter>Libs\glfw</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\glad\include\KHR\khrplatform.h">
+      <Filter>Libs\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="Libs\glad\include\glad\glad.h">
+      <Filter>Libs\glad</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
