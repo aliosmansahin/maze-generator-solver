@@ -68,13 +68,11 @@ void Application::Update()
     if (spacePressed && phaseCompleted) {
         phaseCompleted = false;
         currentPhase = GetNextPhase(currentPhase);
-    }
 
-    if (!phaseCompleted) {
         switch (currentPhase)
         {
         case Utils::Phase::Idle:
-			std::cout << "Phase: Idle" << std::endl;
+            std::cout << "Phase: Idle" << std::endl;
             HandlePhaseIdle();
             break;
         case Utils::Phase::Generation:
@@ -95,6 +93,25 @@ void Application::Update()
     }
 
     spacePressed = false;
+
+    /* We update maze only each <mazeUpdateInterval> seconds */
+    bool updateMaze = false;
+
+    if (!phaseCompleted && (currentPhase == Utils::Phase::Generation || currentPhase == Utils::Phase::Solving)) {
+        float currentTime = static_cast<float>(glfwGetTime());
+
+        if (currentTime - lastMazeUpdateTime >= mazeUpdateInterval) {
+            updateMaze = true;
+			lastMazeUpdateTime = currentTime;
+        }
+    }
+
+    if (maze && updateMaze) {
+        maze->UpdateMaze();
+        if (currentPhase == Utils::Phase::Generation && maze->IsGenerationComplete()) {
+            phaseCompleted = true;
+        }
+    }
 }
 
 void Application::Render()
@@ -107,6 +124,9 @@ void Application::Render()
 #else
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Clear to dark gray color
 #endif
+
+    if(maze)
+		maze->DrawMaze();
 }
 
 void Application::HandlePhaseIdle()
@@ -123,14 +143,11 @@ void Application::HandlePhaseGeneration()
 {
     /* Create new maze */
     if (!maze) {
-        maze = new Maze(20, 20); // Example size
+        maze = new Maze(21, 21); // Example size
     }
 
     /* Start to generate */
 	maze->GenerateMaze();
-
-	// TODO: After generation is complete, set phaseCompleted to true
-	phaseCompleted = true;
 }
 
 void Application::HandlePhaseSolving()

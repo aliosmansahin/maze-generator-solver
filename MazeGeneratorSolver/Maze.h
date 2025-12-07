@@ -11,8 +11,12 @@ Date: December 7, 2025
 */
 
 #include "Settings.h"
+#include "Utils.h"
 
 #include <vector>
+#include <stdlib.h>
+#include <time.h>
+#include <iostream>
 
 class Maze
 {
@@ -29,8 +33,23 @@ public:
 		CleanupGrid();
 	}
 
-	void GenerateMaze() {};
-	void SolveMaze() {};
+	void GenerateMaze();
+	void UpdateGeneration(); //	Iterative step for generation
+
+	void SolveMaze();
+
+	void UpdateMaze();
+	void DrawMaze();
+	void PrintMaze(); // For debugging purposes, It prints the maze to console
+
+	bool IsGenerationComplete() const { return generationComplete; }
+
+private:
+	void InitializeGrid();
+	void CleanupGrid();
+
+private:
+	void GenerateStep(Utils::Cell cell); // A single recursive step in maze generation
 
 private:
 	const int width;
@@ -39,7 +58,11 @@ private:
 	bool** grid = nullptr;
 
 private:
-	void InitializeGrid();
-	void CleanupGrid();
+	bool generating = false;
+	bool generationComplete = false;
+
+	Utils::Cell startCell; // Starting point for maze generation
+	Utils::Cell currentCell; // Current cell being processed
+	std::vector<Utils::Cell> generationStack; // Stack for iterative generation
 };
 

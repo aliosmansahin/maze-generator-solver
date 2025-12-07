@@ -71,4 +71,7 @@ private:
 	bool phaseCompleted = true;
 
 	static bool spacePressed;
+
+	float lastMazeUpdateTime = 0.0f;
+	float mazeUpdateInterval = 0.01f; // Update maze every 0.1 seconds
 };
