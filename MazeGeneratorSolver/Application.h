@@ -48,6 +48,8 @@ public:
 private:
 	void CreateWindow();
 
+	void InitializeShaders();
+
 	void Update();
 	void Render();
 
@@ -65,6 +67,8 @@ private:
 	const int height = WINDOW_HEIGHT;
 	const std::string title = WINDOW_TITLE;
 
+	unsigned int shaderProgram = 0;
+
 	Maze* maze = nullptr;
 
 	Utils::Phase currentPhase = Utils::Phase::Idle;
@@ -73,5 +77,5 @@ private:
 	static bool spacePressed;
 
 	float lastMazeUpdateTime = 0.0f;
-	float mazeUpdateInterval = 0.01f; // Update maze every 0.1 seconds
+	float mazeUpdateInterval = 0.1f; // Update maze every 0.1 seconds
 };

@@ -34,6 +34,8 @@ void Application::Initialize()
 	CreateWindow();
 
 	glfwSetKeyCallback(window, &Application::KeyCallback);
+
+    InitializeShaders();
 }
 
 void Application::Cleanup()
@@ -60,6 +62,64 @@ void Application::CreateWindow()
         std::cerr << "Failed to load GLAD" << std::endl;
         throw std::runtime_error("GLAD loading failed.");
     }
+}
+
+void Application::InitializeShaders()
+{
+    const char* vertexShaderSource = R"(
+        #version 330 core
+        layout(location = 0) in vec2 aPos;
+        layout(location = 1) in vec3 aColor;
+        out vec4 outColor;
+        uniform mat4 projection;
+        uniform mat4 translation;
+
+        void main()
+        {
+            gl_Position = projection * translation * vec4(aPos, 0.0, 1.0);
+            outColor = vec4(aColor, 1.0);
+        }
+    )";
+
+    const char* fragmentShaderSource = R"(
+        #version 330 core
+        in vec4 outColor;
+        void main()
+        {
+            gl_FragColor = outColor;
+        }
+    )";
+
+    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    glCompileShader(vertexShader);
+    
+    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+    glCompileShader(fragmentShader);
+    
+
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
+        std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
+        std::cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+    glUseProgram(shaderProgram);
+    
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 }
 
 void Application::Update()
@@ -125,8 +185,17 @@ void Application::Render()
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Clear to dark gray color
 #endif
 
+    float orthoMatrix[16] = {
+        2.0f / (float)width,     0,              0,  0,
+        0,             2.0f / (float)height,     0,  0,
+        0,             0,             -2,  0,
+        0,             0,              0,  1
+    };
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, orthoMatrix);
+
     if(maze)
-		maze->DrawMaze();
+		maze->DrawMaze(shaderProgram);
 }
 
 void Application::HandlePhaseIdle()

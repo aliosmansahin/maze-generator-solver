@@ -29,4 +29,5 @@ namespace Utils {
 		int x;
 		int y;
 	};
+
 }
