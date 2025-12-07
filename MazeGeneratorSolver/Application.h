@@ -10,7 +10,12 @@ Date: December 7, 2025
 
 */
 
+/* Helpers */
 #include "Settings.h"
+#include "Utils.h"
+
+/* Maze class */
+#include "Maze.h"
 
 /* GLAD and GLFW */
 #include <glad/glad.h>
@@ -31,19 +36,39 @@ public:
 	Application& operator=(const Application& other) = delete;
 
 	/* Default destructor */
-	~Application() = default; 
+	~Application() 
+	{
+		Cleanup();
+	}
 
 	void Run();
 	void Initialize();
+	void Cleanup();
 
 private:
 	void CreateWindow();
 
+	void Update();
+	void Render();
+
+	void HandlePhaseIdle();
+	void HandlePhaseGeneration();
+	void HandlePhaseSolving();
+	void HandlePhaseCompleted();
+
+	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 private:
 	GLFWwindow* window = nullptr;
 
-	int width = MANIPULATE_WINDOW_WIDTH;
-	int height = MANIPULATE_WINDOW_HEIGHT;
-	std::string title = MANIPULATE_WINDOW_TITLE;
-};
+	const int width = WINDOW_WIDTH;
+	const int height = WINDOW_HEIGHT;
+	const std::string title = WINDOW_TITLE;
 
+	Maze* maze = nullptr;
+
+	Utils::Phase currentPhase = Utils::Phase::Idle;
+	bool phaseCompleted = true;
+
+	static bool spacePressed;
+};

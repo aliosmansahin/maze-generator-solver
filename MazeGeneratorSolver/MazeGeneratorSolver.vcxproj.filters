@@ -17,6 +17,9 @@
     <Filter Include="Files\Application">
       <UniqueIdentifier>{af0b44f9-c937-4b8b-8477-a2d639179442}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Files\Maze">
+      <UniqueIdentifier>{ed8ccaca-5f56-449d-9714-a53b8d23fc39}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MazeGeneratorSolver.cpp">
@@ -27,6 +30,9 @@
     </ClCompile>
     <ClCompile Include="Application.cpp">
       <Filter>Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Maze.cpp">
+      <Filter>Files\Maze</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -46,6 +52,12 @@
       <Filter>Files\Application</Filter>
     </ClInclude>
     <ClInclude Include="Settings.h">
+      <Filter>Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Maze.h">
+      <Filter>Files\Maze</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
       <Filter>Files</Filter>
     </ClInclude>
   </ItemGroup>
