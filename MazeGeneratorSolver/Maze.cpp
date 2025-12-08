@@ -104,7 +104,7 @@ void Maze::UpdateGeneration()
 	}
 }
 
-void Maze::UpdateSelection(int mouseX, int mouseY)
+void Maze::UpdateSelection(int mouseX, int mouseY, bool leftMouseClicked)
 {
 	/* Use mouse position to find pointed cell */
 
@@ -157,13 +157,13 @@ void Maze::SolveMaze()
 	*/
 }
 
-void Maze::UpdateMaze(int mouseX, int mouseY)
+void Maze::UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked)
 {
 	if(generating && !generationComplete) {
 		UpdateGeneration();
 	}
 	if (selectingCells) {
-		UpdateSelection(mouseX, mouseY);
+		UpdateSelection(mouseX, mouseY, leftMouseClicked);
 	}
 }
 

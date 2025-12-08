@@ -49,6 +49,7 @@ private:
 	void CreateWindow();
 
 	void InitializeShaders();
+	void SetGLFWCallbacks();
 
 	void Update();
 	void Render();
@@ -60,6 +61,8 @@ private:
 	void HandlePhaseCompleted();
 
 	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+	static void MousePositionCallback(GLFWwindow* window, double xpos, double ypos);
 
 private:
 	GLFWwindow* window = nullptr;
@@ -76,7 +79,10 @@ private:
 	bool phaseCompleted = true;
 
 	static bool spacePressed;
+	static bool leftMouseClicked;
+	static int mouseX;
+	static int mouseY;
 
 	float lastMazeUpdateTime = 0.0f;
-	float mazeUpdateInterval = 0.01f; // Update maze every 0.1 seconds
+	float mazeUpdateInterval = 0.01f; // Update maze every 0.01 seconds
 };

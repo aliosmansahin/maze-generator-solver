@@ -40,9 +40,9 @@ public:
 	void SolveMaze();
 
 	void UpdateGeneration(); //	Iterative step for generation
-	void UpdateSelection(int mouseX, int mouseY);  // Update selection process
+	void UpdateSelection(int mouseX, int mouseY, bool leftMouseClicked);  // Update selection process
 
-	void UpdateMaze(int mouseX, int mouseY);
+	void UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked);
 	void DrawMaze(unsigned int shaderProgram);
 	void DrawCell(unsigned int shaderProgram, float r, float g, float b, Utils::Cell cell);
 	void PrintMaze(); // For debugging purposes, It prints the maze to console

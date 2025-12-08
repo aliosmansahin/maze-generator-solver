@@ -1,6 +1,9 @@
 #include "Application.h"
 
 bool Application::spacePressed = false;
+bool Application::leftMouseClicked = false;
+int Application::mouseX = 0;
+int Application::mouseY = 0;
 
 /*
 PURPOSE: This function runs the main loop of the application,
@@ -33,7 +36,7 @@ void Application::Initialize()
 
 	CreateWindow();
 
-	glfwSetKeyCallback(window, &Application::KeyCallback);
+	SetGLFWCallbacks();
 
     InitializeShaders();
 }
@@ -123,6 +126,13 @@ void Application::InitializeShaders()
     glDeleteShader(fragmentShader);
 }
 
+void Application::SetGLFWCallbacks()
+{
+    glfwSetKeyCallback(window, &Application::KeyCallback);
+    glfwSetMouseButtonCallback(window, &Application::MouseButtonCallback);
+    glfwSetCursorPosCallback(window, &Application::MousePositionCallback);
+}
+
 void Application::Update()
 {
     /* Keyboard events */
@@ -142,7 +152,7 @@ void Application::Update()
             break;
 		case Utils::Phase::CellSelection:
             std::cout << "Phase: Cell Selection" << std::endl;
-            HandlePhaseCellSelection(); // Not implemented yet
+            HandlePhaseCellSelection();
 			break;
         case Utils::Phase::Solving:
             std::cout << "Phase: Solving" << std::endl;
@@ -158,6 +168,7 @@ void Application::Update()
     }
 
     spacePressed = false;
+	leftMouseClicked = false;
 
     /* We update maze only each <mazeUpdateInterval> seconds */
     bool updateMaze = false;
@@ -172,10 +183,7 @@ void Application::Update()
     }
 
     if (maze && updateMaze) {
-		double mouseX, mouseY;
-		glfwGetCursorPos(window, &mouseX, &mouseY);
-
-        maze->UpdateMaze(mouseX, mouseY);
+        maze->UpdateMaze(mouseX, mouseY, leftMouseClicked);
         if (currentPhase == Utils::Phase::Generation && maze->IsGenerationComplete()) {
             phaseCompleted = true;
         }
@@ -256,4 +264,16 @@ void Application::KeyCallback(GLFWwindow* window, int key, int scancode, int act
 {
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         spacePressed = true;
+}
+
+void Application::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+		leftMouseClicked = true;
+}
+
+void Application::MousePositionCallback(GLFWwindow* window, double xpos, double ypos)
+{
+	mouseX = (double)xpos;
+	mouseY = (double)ypos;
 }
