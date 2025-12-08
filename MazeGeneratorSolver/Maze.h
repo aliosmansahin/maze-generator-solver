@@ -44,7 +44,7 @@ public:
 
 	void UpdateMaze(int mouseX, int mouseY);
 	void DrawMaze(unsigned int shaderProgram);
-	void DrawCell(unsigned int shaderProgram, unsigned int vertexArrayToDraw, Utils::Cell cell);
+	void DrawCell(unsigned int shaderProgram, float r, float g, float b, Utils::Cell cell);
 	void PrintMaze(); // For debugging purposes, It prints the maze to console
 
 	bool IsGenerationComplete() const { return generationComplete; }
@@ -57,7 +57,7 @@ private:
 	void GenerateStep(Utils::Cell cell); // A single recursive step in maze generation
 
 private:
-	float* GenerateGridVertices(float gridW, float gridH, float r, float g, float b);
+	float* GenerateGridVertices(float gridW, float gridH);
 
 private:
 	const int width;
@@ -97,8 +97,5 @@ private:
 private:
 	unsigned int mazeCellBuffer = 0; // OpenGL buffer for maze cells
 	unsigned int mazeCellVAO = 0;    // OpenGL Vertex Array Object for maze cells
-
-	unsigned int currentCellBuffer = 0; // OpenGL buffer for current cell
-	unsigned int currentCellVAO = 0;    // OpenGL Vertex Array Object for current cell
 };
 

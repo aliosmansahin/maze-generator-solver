@@ -45,14 +45,14 @@ void Maze::GenerateStep(Utils::Cell cell)
 /*
 WARNING: Use delete[] after usage to avoid memory leaks.
 */
-float* Maze::GenerateGridVertices(float gridW, float gridH, float r, float g, float b)
+float* Maze::GenerateGridVertices(float gridW, float gridH)
 {
-	float* gridVertices = new float[20];
+	float* gridVertices = new float[8];
 
-	gridVertices[0] = -gridW; gridVertices[1] = -gridH; gridVertices[2] = r; gridVertices[3] = g; gridVertices[4] = b;
-	gridVertices[5] = gridW; gridVertices[6] = -gridH; gridVertices[7] = r; gridVertices[8] = g; gridVertices[9] = b;
-	gridVertices[10] = gridW; gridVertices[11] = gridH; gridVertices[12] = r; gridVertices[13] = g; gridVertices[14] = b;
-	gridVertices[15] = -gridW; gridVertices[16] = gridH; gridVertices[17] = r; gridVertices[18] = g; gridVertices[19] = b;
+	gridVertices[0] = -gridW; gridVertices[1] = -gridH;
+	gridVertices[2] = gridW; gridVertices[3] = -gridH;
+	gridVertices[4] = gridW; gridVertices[5] = gridH;
+	gridVertices[6] = -gridW; gridVertices[7] = gridH;
 
 	return gridVertices;
 }
@@ -172,22 +172,26 @@ void Maze::DrawMaze(unsigned int shaderProgram)
 	for(int i = 0; i < height; ++i) {
 		for(int j = 0; j < width; ++j) {
 			if(!grid[i][j]) {
-				DrawCell(shaderProgram, mazeCellVAO, Utils::Cell{ j, i });
+				DrawCell(shaderProgram, 1.0f, 1.0f, 1.0f, Utils::Cell{ j, i });
 			}
 		}
 	}
 
-	if(generationStack.empty())
-		DrawCell(shaderProgram, currentCellVAO, startCell);
-	else
-		DrawCell(shaderProgram, currentCellVAO, generationStack.back());
+	if(!generationStack.empty())
+		DrawCell(shaderProgram, 0.0f, 1.0f, 0.0f, generationStack.back());
 
 	if(selectingCells && pointing)
-		DrawCell(shaderProgram, currentCellVAO, pointedCell);
+		DrawCell(shaderProgram, 1.0f, 0.0f, 0.0f, pointedCell);
 }
 
-void Maze::DrawCell(unsigned int shaderProgram, unsigned int vertexArrayToDraw, Utils::Cell cell)
+/*
+PURPOSE: Draws a single cell at given position with specified color.
+	This function sends the color of the cell to the fragment shader
+	to avoid creating multiple VAOs for different colors.
+*/
+void Maze::DrawCell(unsigned int shaderProgram, float r, float g, float b, Utils::Cell cell)
 {
+	/* Send translation matrix */
 	int translateX = cell.x * cellHalfSize * 2 - width * cellHalfSize;
 	int translateY = cell.y * cellHalfSize * 2 - height * cellHalfSize;
 	float translationMatrix[16] = {
@@ -198,8 +202,11 @@ void Maze::DrawCell(unsigned int shaderProgram, unsigned int vertexArrayToDraw, 
 	};
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "translation"), 1, GL_FALSE, translationMatrix);
 
+	/* Send color */
+	glUniform3f(glGetUniformLocation(shaderProgram, "cellColor"), r, g, b);
+
 	/* Render cell here */
-	glBindVertexArray(vertexArrayToDraw); // Bind VAO
+	glBindVertexArray(mazeCellVAO); // Bind VAO
 	glDrawArrays(GL_QUADS, 0, 4);
 	glBindVertexArray(0); // Unbind VAO
 }
@@ -221,6 +228,8 @@ void Maze::InitializeGrid()
 	generationComplete = false;
 	solving = false;
 	solvingComplete = false;
+	pointing = false;
+	selectingCells = false;
 
 	/* Allocate memory for grid */
 	grid = new bool* [height];
@@ -228,7 +237,7 @@ void Maze::InitializeGrid()
 		grid[i] = new bool[width]{};
 	}
 
-	float* gridVertices = GenerateGridVertices((float)cellHalfSize, (float)cellHalfSize, 1.0f, 1.0f, 1.0f);
+	float* gridVertices = GenerateGridVertices((float)cellHalfSize, (float)cellHalfSize);
 
 	glGenBuffers(1, &mazeCellBuffer);
 	glGenVertexArrays(1, &mazeCellVAO);
@@ -236,37 +245,14 @@ void Maze::InitializeGrid()
 	glBindVertexArray(mazeCellVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, mazeCellBuffer);
 	
-	glBufferData(GL_ARRAY_BUFFER, 20 * sizeof(float), gridVertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), gridVertices, GL_STATIC_DRAW);
 
 	glEnableVertexArrayAttrib(mazeCellBuffer, 0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind buffer
 	glBindVertexArray(0); // Unbind VAO
 	delete[] gridVertices; // Free allocated memory
-
-	float* currentCellVertices = GenerateGridVertices((float)cellHalfSize, (float)cellHalfSize, 0.0f, 1.0f, 0.0f);
-
-	glGenBuffers(1, &currentCellBuffer);
-	glGenVertexArrays(1, &currentCellVAO);
-	
-	glBindVertexArray(currentCellVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, currentCellBuffer);
-	
-	glBufferData(GL_ARRAY_BUFFER, 20 * sizeof(float), currentCellVertices, GL_STATIC_DRAW);
-	
-	glEnableVertexArrayAttrib(currentCellBuffer, 0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	delete[] currentCellVertices;
 }
 
 void Maze::CleanupGrid()
