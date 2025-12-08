@@ -113,8 +113,10 @@ void Maze::UpdateSelection(int mouseX, int mouseY)
 	mouseX -= WINDOW_WIDTH / 2;
 	mouseY -= WINDOW_HEIGHT / 2;
 
-	int cellX = (mouseX + cellHalfSize) / (cellHalfSize * 2.0f) + width / 2.0f;
-	int cellY = (mouseY + cellHalfSize) / (cellHalfSize * 2.0f) + height / 2.0f;
+	int cellX = (int)((mouseX + cellHalfSize) / (cellHalfSize * 2.0f) + width / 2.0f);
+	int cellY = (int)((mouseY + cellHalfSize) / (cellHalfSize * 2.0f) + height / 2.0f);
+
+	bool mouseInsideMaze = cellX >= 0 && cellX < width && cellY >= 0 && cellY < height;
 
 	/* Clamp cell indices to be within grid bounds */
 	if (cellX < 0) cellX = 0;
@@ -123,7 +125,25 @@ void Maze::UpdateSelection(int mouseX, int mouseY)
 	if (cellY < 0) cellY = 0;
 	if (cellY >= height) cellY = height - 1;
 
-	pointedCell = { cellX, cellY };
+	/* Do some checks to avoid point to the walls on inside of the map */
+	bool isWall = !grid[cellY][cellX];
+	bool isBound = cellX == 0 || cellX == width - 1 || cellY == 0 || cellY == height - 1;
+
+	bool hasNeighborWall = false;
+
+	if (cellX == 0 && !grid[cellY][cellX + 1]) hasNeighborWall = true; // Left
+	if (cellX == width - 1 && !grid[cellY][cellX - 1]) hasNeighborWall = true; // Right
+	if (cellY == 0 && !grid[cellY + 1][cellX]) hasNeighborWall = true; // Down
+	if (cellY == height - 1 && !grid[cellY - 1][cellX]) hasNeighborWall = true; // Up
+
+	/* Set pointed cell if there is no issue from the checks */
+	if((!isWall || (isBound && !hasNeighborWall)) && mouseInsideMaze) {
+		pointedCell = { cellX, cellY };
+		pointing = true;
+	}
+	else {
+		pointing = false;
+	}
 }
 
 void Maze::SolveMaze()
@@ -162,7 +182,7 @@ void Maze::DrawMaze(unsigned int shaderProgram)
 	else
 		DrawCell(shaderProgram, currentCellVAO, generationStack.back());
 
-	if(selectingCells)
+	if(selectingCells && pointing)
 		DrawCell(shaderProgram, currentCellVAO, pointedCell);
 }
 

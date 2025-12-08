@@ -85,6 +85,7 @@ private:
 	Utils::Cell solveEndCell;   // Ending point for maze solving
 
 	Utils::Cell pointedCell; // Currently pointed cell by mouse
+	bool pointing = false;
 	
 private:
 	bool selectingCells = false; // Flag to indicate if we are in cell selection mode
