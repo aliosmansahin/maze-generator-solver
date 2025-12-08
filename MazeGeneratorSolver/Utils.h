@@ -7,6 +7,7 @@ namespace Utils {
 	{
 		Idle,
 		Generation,
+		CellSelection,
 		Solving,
 		Completed
 	};

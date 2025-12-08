@@ -55,6 +55,7 @@ private:
 
 	void HandlePhaseIdle();
 	void HandlePhaseGeneration();
+	void HandlePhaseCellSelection();
 	void HandlePhaseSolving();
 	void HandlePhaseCompleted();
 
@@ -77,5 +78,5 @@ private:
 	static bool spacePressed;
 
 	float lastMazeUpdateTime = 0.0f;
-	float mazeUpdateInterval = 0.1f; // Update maze every 0.1 seconds
+	float mazeUpdateInterval = 0.01f; // Update maze every 0.1 seconds
 };

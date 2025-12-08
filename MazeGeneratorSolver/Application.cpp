@@ -139,6 +139,10 @@ void Application::Update()
             std::cout << "Phase: Generation" << std::endl;
             HandlePhaseGeneration();
             break;
+		case Utils::Phase::CellSelection:
+            std::cout << "Phase: Cell Selection" << std::endl;
+            HandlePhaseCellSelection(); // Not implemented yet
+			break;
         case Utils::Phase::Solving:
             std::cout << "Phase: Solving" << std::endl;
             HandlePhaseSolving();
@@ -157,7 +161,7 @@ void Application::Update()
     /* We update maze only each <mazeUpdateInterval> seconds */
     bool updateMaze = false;
 
-    if (!phaseCompleted && (currentPhase == Utils::Phase::Generation || currentPhase == Utils::Phase::Solving)) {
+    if (!phaseCompleted && (currentPhase == Utils::Phase::Generation || currentPhase == Utils::Phase::Solving || currentPhase == Utils::Phase::CellSelection)) {
         float currentTime = static_cast<float>(glfwGetTime());
 
         if (currentTime - lastMazeUpdateTime >= mazeUpdateInterval) {
@@ -167,7 +171,10 @@ void Application::Update()
     }
 
     if (maze && updateMaze) {
-        maze->UpdateMaze();
+		double mouseX, mouseY;
+		glfwGetCursorPos(window, &mouseX, &mouseY);
+
+        maze->UpdateMaze(mouseX, mouseY);
         if (currentPhase == Utils::Phase::Generation && maze->IsGenerationComplete()) {
             phaseCompleted = true;
         }
@@ -217,6 +224,15 @@ void Application::HandlePhaseGeneration()
 
     /* Start to generate */
 	maze->GenerateMaze();
+}
+
+void Application::HandlePhaseCellSelection()
+{
+    /* Cell selection handling */
+    if (maze)
+        maze->StartSelection();
+
+	//phaseCompleted = true;
 }
 
 void Application::HandlePhaseSolving()

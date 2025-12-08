@@ -36,11 +36,13 @@ public:
 	}
 
 	void GenerateMaze();
-	void UpdateGeneration(); //	Iterative step for generation
-
+	void StartSelection();
 	void SolveMaze();
 
-	void UpdateMaze();
+	void UpdateGeneration(); //	Iterative step for generation
+	void UpdateSelection(int mouseX, int mouseY);  // Update selection process
+
+	void UpdateMaze(int mouseX, int mouseY);
 	void DrawMaze(unsigned int shaderProgram);
 	void DrawCell(unsigned int shaderProgram, unsigned int vertexArrayToDraw, Utils::Cell cell);
 	void PrintMaze(); // For debugging purposes, It prints the maze to console
@@ -64,6 +66,7 @@ private:
 	bool** grid = nullptr;
 
 private:
+	/* Variables to generate the maze */
 	bool generating = false;
 	bool generationComplete = false;
 
@@ -71,6 +74,23 @@ private:
 	Utils::Cell currentCell; // Current cell being processed
 	std::vector<Utils::Cell> generationStack; // Stack for iterative generation
 
+private:
+	/* Variables to solve the maze */
+	bool solving = false;
+	bool solvingComplete = false;
+
+private:
+	/* Those are user selected */
+	Utils::Cell solveStartCell; // Starting point for maze solving
+	Utils::Cell solveEndCell;   // Ending point for maze solving
+
+	Utils::Cell pointedCell; // Currently pointed cell by mouse
+	
+private:
+	bool selectingCells = false; // Flag to indicate if we are in cell selection mode
+
+
+private:
 	int cellHalfSize = 10; // Size of each cell in pixels
 
 private:

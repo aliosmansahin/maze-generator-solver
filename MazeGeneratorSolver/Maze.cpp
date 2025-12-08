@@ -23,6 +23,11 @@ void Maze::GenerateMaze()
 	std::cout << "Maze Generation Started from (" << startCell.x << ", " << startCell.y << ")\n";
 }
 
+void Maze::StartSelection()
+{
+	selectingCells = true;
+}
+
 void Maze::GenerateStep(Utils::Cell cell)
 {
 	grid[cell.y][cell.x] = true; // Mark cell as part of the maze
@@ -99,15 +104,46 @@ void Maze::UpdateGeneration()
 	}
 }
 
-void Maze::SolveMaze()
+void Maze::UpdateSelection(int mouseX, int mouseY)
 {
-	/* TODO: Implement Solving */
+	/* Use mouse position to find pointed cell */
+
+	/* Convert mouse coordinates into our coordinate system */
+	mouseY = WINDOW_HEIGHT - mouseY; // Invert Y axis
+	mouseX -= WINDOW_WIDTH / 2;
+	mouseY -= WINDOW_HEIGHT / 2;
+
+	int cellX = (mouseX + cellHalfSize) / (cellHalfSize * 2.0f) + width / 2.0f;
+	int cellY = (mouseY + cellHalfSize) / (cellHalfSize * 2.0f) + height / 2.0f;
+
+	/* Clamp cell indices to be within grid bounds */
+	if (cellX < 0) cellX = 0;
+	if (cellX >= width) cellX = width - 1;
+
+	if (cellY < 0) cellY = 0;
+	if (cellY >= height) cellY = height - 1;
+
+	pointedCell = { cellX, cellY };
 }
 
-void Maze::UpdateMaze()
+void Maze::SolveMaze()
+{
+	solving = true;
+	solvingComplete = false;
+
+	/*
+		TODO: We will select some pathfinding algorithm to solve the maze here
+		But before that, i will add selection mechanism of start and end points for solving
+	*/
+}
+
+void Maze::UpdateMaze(int mouseX, int mouseY)
 {
 	if(generating && !generationComplete) {
 		UpdateGeneration();
+	}
+	if (selectingCells) {
+		UpdateSelection(mouseX, mouseY);
 	}
 }
 
@@ -125,6 +161,9 @@ void Maze::DrawMaze(unsigned int shaderProgram)
 		DrawCell(shaderProgram, currentCellVAO, startCell);
 	else
 		DrawCell(shaderProgram, currentCellVAO, generationStack.back());
+
+	if(selectingCells)
+		DrawCell(shaderProgram, currentCellVAO, pointedCell);
 }
 
 void Maze::DrawCell(unsigned int shaderProgram, unsigned int vertexArrayToDraw, Utils::Cell cell)
@@ -157,6 +196,12 @@ void Maze::PrintMaze()
 
 void Maze::InitializeGrid()
 {
+	/* Setup the variables */
+	generating = false;
+	generationComplete = false;
+	solving = false;
+	solvingComplete = false;
+
 	/* Allocate memory for grid */
 	grid = new bool* [height];
 	for (int i = 0; i < height; ++i) {
