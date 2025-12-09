@@ -144,6 +144,21 @@ void Maze::UpdateSelection(int mouseX, int mouseY, bool leftMouseClicked)
 	else {
 		pointing = false;
 	}
+
+	if(leftMouseClicked && pointing && !selectionComplete) {
+		if(selectionPhase == Utils::SelectionPhase::SelectingStart) {
+			solveStartCell = pointedCell;
+			hasSolveStartCell = true;
+			selectionPhase = Utils::SelectionPhase::SelectingEnd;
+			std::cout << "Start Cell Selected at (" << solveStartCell.x << ", " << solveStartCell.y << ")\n";
+		}
+		else if(selectionPhase == Utils::SelectionPhase::SelectingEnd) {
+			solveEndCell = pointedCell;
+			hasSolveEndCell = true;
+			selectionComplete = true;
+			std::cout << "End Cell Selected at (" << solveEndCell.x << ", " << solveEndCell.y << ")\n";
+		}
+	}
 }
 
 void Maze::SolveMaze()
@@ -182,6 +197,12 @@ void Maze::DrawMaze(unsigned int shaderProgram)
 
 	if(selectingCells && pointing)
 		DrawCell(shaderProgram, 1.0f, 0.0f, 0.0f, pointedCell);
+
+	if(hasSolveStartCell)
+		DrawCell(shaderProgram, 0.0f, 0.0f, 1.0f, solveStartCell);
+
+	if (hasSolveEndCell)
+		DrawCell(shaderProgram, 1.0f, 1.0f, 0.0f, solveEndCell);
 }
 
 /*
@@ -230,6 +251,10 @@ void Maze::InitializeGrid()
 	solvingComplete = false;
 	pointing = false;
 	selectingCells = false;
+	selectionComplete = false;
+	selectionPhase = Utils::SelectionPhase::SelectingStart;
+	hasSolveStartCell = false;
+	hasSolveEndCell = false;
 
 	/* Allocate memory for grid */
 	grid = new bool* [height];

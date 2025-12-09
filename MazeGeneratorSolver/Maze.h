@@ -48,6 +48,8 @@ public:
 	void PrintMaze(); // For debugging purposes, It prints the maze to console
 
 	bool IsGenerationComplete() const { return generationComplete; }
+	bool IsSolvingComplete() const { return solvingComplete; }
+	bool IsSelectionComplete() const { return selectionComplete; }
 
 private:
 	void InitializeGrid();
@@ -82,14 +84,17 @@ private:
 private:
 	/* Those are user selected */
 	Utils::Cell solveStartCell; // Starting point for maze solving
+	bool hasSolveStartCell = false;
+
 	Utils::Cell solveEndCell;   // Ending point for maze solving
+	bool hasSolveEndCell = false;
 
 	Utils::Cell pointedCell; // Currently pointed cell by mouse
 	bool pointing = false;
-	
-private:
-	bool selectingCells = false; // Flag to indicate if we are in cell selection mode
 
+	bool selectingCells = false; // Flag to indicate if we are in cell selection mode
+	bool selectionComplete = false;
+	Utils::SelectionPhase selectionPhase = Utils::SelectionPhase::SelectingStart;
 
 private:
 	int cellHalfSize = 10; // Size of each cell in pixels

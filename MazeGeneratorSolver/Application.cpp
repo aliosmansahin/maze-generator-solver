@@ -167,9 +167,6 @@ void Application::Update()
         }
     }
 
-    spacePressed = false;
-	leftMouseClicked = false;
-
     /* We update maze only each <mazeUpdateInterval> seconds */
     bool updateMaze = false;
 
@@ -182,12 +179,28 @@ void Application::Update()
         }
     }
 
+    /* 
+        This variable stores the last true state of the mouse left button, until UpdateMaze was called
+		This is done to avoid missing clicks between frames when maze update is not performed every frame
+    */
+	static bool leftMouseClickedLocal = false;
+    if(leftMouseClicked)
+		leftMouseClickedLocal = true;
+
     if (maze && updateMaze) {
-        maze->UpdateMaze(mouseX, mouseY, leftMouseClicked);
-        if (currentPhase == Utils::Phase::Generation && maze->IsGenerationComplete()) {
+        maze->UpdateMaze(mouseX, mouseY, leftMouseClickedLocal);
+        if ((currentPhase == Utils::Phase::Generation && maze->IsGenerationComplete()) ||
+            (currentPhase == Utils::Phase::Solving && maze->IsSolvingComplete()) ||
+            (currentPhase == Utils::Phase::CellSelection && maze->IsSelectionComplete())) {
+
             phaseCompleted = true;
         }
+
+		leftMouseClickedLocal = false;
     }
+
+    spacePressed = false;
+    leftMouseClicked = false;
 }
 
 void Application::Render()
@@ -240,8 +253,6 @@ void Application::HandlePhaseCellSelection()
     /* Cell selection handling */
     if (maze)
         maze->StartSelection();
-
-	//phaseCompleted = true;
 }
 
 void Application::HandlePhaseSolving()

@@ -16,6 +16,12 @@ namespace Utils {
 		return static_cast<Phase>((static_cast<int>(currentPhase) + 1) % 4);
 	}
 
+	enum class SelectionPhase
+	{
+		SelectingStart,
+		SelectingEnd
+	};
+
 	inline std::pair<int, int> GetDirection(int index) {
 		std::pair<int, int> Directions[] = {
 			{ 0, -1 }, // Up
