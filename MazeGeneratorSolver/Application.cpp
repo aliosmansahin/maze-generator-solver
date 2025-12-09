@@ -260,9 +260,6 @@ void Application::HandlePhaseSolving()
     /* Start to solve */
     if(maze)
 		maze->SolveMaze();
-
-    // TODO: After solving is complete, set phaseCompleted to true
-    phaseCompleted = true;
 }
 
 void Application::HandlePhaseCompleted()

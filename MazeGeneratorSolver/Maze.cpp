@@ -162,15 +162,127 @@ void Maze::UpdateSelection(int mouseX, int mouseY, bool leftMouseClicked)
 	}
 }
 
+void Maze::UpdateSolving()
+{
+	/* Get movable direction of the current cell */
+	std::vector<Utils::Direction> movableDirections;
+	bool movable = true;
+
+	for(int i = 0; i < 4; ++i) {
+		int nextX = currentSolveCell.x + Utils::GetDirection(i).first;
+		int nextY = currentSolveCell.y + Utils::GetDirection(i).second;
+		if(nextX >= 0 && nextX < width && nextY >= 0 && nextY < height && grid[nextY][nextX]) {
+			movableDirections.push_back(Utils::GetDirection(i));
+		}
+	}
+
+	Utils::Direction nextDirection{};
+	
+	/* Decide the direction we will move */
+	if (movableDirections.size() <= 2) {
+		/* We are in a passage */
+
+		if (movableDirections.size() == 2) {
+			/* We are in a dead-end */
+			std::remove(movableDirections.begin(), movableDirections.end(), Utils::GetInvertedDirection(currentDirection));
+		}
+
+		nextDirection = movableDirections[0];
+	}
+	else {
+		/* We are in a junction */
+		std::cout << "Junction at (" << currentSolveCell.x << ", " << currentSolveCell.y << ")\n";
+
+		/* Pass the previous entrance */
+		Utils::Cell previousCell{};
+		previousCell.x = currentSolveCell.x + Utils::GetInvertedDirection(currentDirection).first;
+		previousCell.y = currentSolveCell.y + Utils::GetInvertedDirection(currentDirection).second;
+
+		Utils::PassOnEntrance(passedEntrances, previousCell);
+
+		/* Get passed entrances */
+		std::vector<Utils::Direction> unpassedDirections;
+
+		/* TODO: Set those variables */
+		bool isOnlyPassedPrevious = true;
+		bool isAllEntrancesPassed = true;
+
+		for (const auto& direction : movableDirections) {
+			Utils::Cell nextCell{};
+			nextCell.x = currentSolveCell.x + direction.first;
+			nextCell.y = currentSolveCell.y + direction.second;
+			if (!Utils::IsPassedEntrance(passedEntrances, nextCell)) {
+				unpassedDirections.push_back(direction);
+			}
+		}
+		if (isOnlyPassedPrevious) {
+			/* Select an random unpassed entrance */
+			if (!unpassedDirections.empty()) {
+				int selectedIndex = rand() % unpassedDirections.size();
+				nextDirection = unpassedDirections[selectedIndex];
+
+				std::cout << "---IsOnlyPassedPrevious" << std::endl;
+			}
+		}
+		else if (isAllEntrancesPassed) {
+			/* All entrances are passed, go back */
+			nextDirection = Utils::GetInvertedDirection(currentDirection);
+			std::cout << "---IsAllEntrancesPassed" << std::endl;
+		}
+		else {
+			/* Select any entrance with the fewest passed */
+			int minPassCount = INT_MAX;
+			std::vector<Utils::Direction> leastPassedDirections;
+			for (const auto& direction : movableDirections) {
+				Utils::Cell nextCell{};
+				nextCell.x = currentSolveCell.x + direction.first;
+				nextCell.y = currentSolveCell.y + direction.second;
+				int passCount = Utils::GetPassCount(passedEntrances, nextCell);
+				if (passCount < minPassCount) {
+					minPassCount = passCount;
+					leastPassedDirections.clear();
+					leastPassedDirections.push_back(direction);
+				}
+				else if (passCount == minPassCount) {
+					leastPassedDirections.push_back(direction);
+				}
+			}
+			/* Select a random direction from least passed directions */
+			if (!leastPassedDirections.empty()) {
+				int selectedIndex = rand() % leastPassedDirections.size();
+				nextDirection = leastPassedDirections[selectedIndex];
+
+				std::cout << "---TheFewestEntrance" << std::endl;
+			}
+		}
+
+		Utils::Cell nextCell{};
+		nextCell.x = currentSolveCell.x + nextDirection.first;
+		nextCell.y = currentSolveCell.y + nextDirection.second;
+
+		Utils::PassOnEntrance(passedEntrances, nextCell);
+	}
+
+	currentDirection = nextDirection;
+
+	/* Mode the current cell */
+	if (movable) {
+		currentSolveCell.x += currentDirection.first;
+		currentSolveCell.y += currentDirection.second;
+	}
+}
+
 void Maze::SolveMaze()
 {
 	solving = true;
 	solvingComplete = false;
 
-	/*
-		TODO: We will select some pathfinding algorithm to solve the maze here
-		But before that, i will add selection mechanism of start and end points for solving
-	*/
+	/* Start to use Tremaux's algorithm */
+
+	std::cout << "Maze Solving Started from (" << solveStartCell.x << ", " << solveStartCell.y << ") to (" << solveEndCell.x << ", " << solveEndCell.y << ")\n";
+
+	currentSolveCell = solveStartCell;
+	passedEntrances.clear();
 }
 
 void Maze::UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked)
@@ -180,6 +292,9 @@ void Maze::UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked)
 	}
 	if (selectingCells) {
 		UpdateSelection(mouseX, mouseY, leftMouseClicked);
+	}
+	if(solving && !solvingComplete) {
+		UpdateSolving();
 	}
 }
 
@@ -204,6 +319,16 @@ void Maze::DrawMaze(unsigned int shaderProgram)
 
 	if (hasSolveEndCell)
 		DrawCell(shaderProgram, 1.0f, 1.0f, 0.0f, solveEndCell);
+
+	for (const auto& passedEntrance : passedEntrances) {
+		if(passedEntrance.passCount == 1)
+			DrawCell(shaderProgram, 0.0f, 1.0f, 1.0f, passedEntrance.cell);
+		else if(passedEntrance.passCount == 2)
+			DrawCell(shaderProgram, 0.5f, 0.5f, 0.5f, passedEntrance.cell);
+	}
+
+	if (solving)
+		DrawCell(shaderProgram, 1.0f, 0.0f, 1.0f, currentSolveCell);
 }
 
 /*

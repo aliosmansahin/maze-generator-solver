@@ -19,6 +19,7 @@ Date: December 7, 2025
 #include <stdlib.h>
 #include <time.h>
 #include <iostream>
+#include <algorithm>
 
 class Maze
 {
@@ -41,6 +42,7 @@ public:
 
 	void UpdateGeneration(); //	Iterative step for generation
 	void UpdateSelection(int mouseX, int mouseY, bool leftMouseClicked);  // Update selection process
+	void UpdateSolving();    // Iterative step for solving
 
 	void UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked);
 	void DrawMaze(unsigned int shaderProgram);
@@ -80,6 +82,11 @@ private:
 	/* Variables to solve the maze */
 	bool solving = false;
 	bool solvingComplete = false;
+
+	Utils::Cell currentSolveCell; // Current cell being processed in solving
+	Utils::Direction currentDirection;
+
+	std::vector<Utils::Entrance> passedEntrances;
 
 private:
 	/* Those are user selected */

@@ -84,5 +84,5 @@ private:
 	static int mouseY;
 
 	float lastMazeUpdateTime = 0.0f;
-	float mazeUpdateInterval = 0.01f; // Update maze every 0.01 seconds
+	float mazeUpdateInterval = 0.1f; // Update maze every 0.01 seconds
 };
