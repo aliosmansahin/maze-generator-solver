@@ -145,6 +145,7 @@ void Maze::UpdateSelection(int mouseX, int mouseY, bool leftMouseClicked)
 		pointing = false;
 	}
 
+	/* Cell selections to choose start and end points */
 	if(leftMouseClicked && pointing && !selectionComplete) {
 		if(selectionPhase == Utils::SelectionPhase::SelectingStart) {
 			solveStartCell = pointedCell;
