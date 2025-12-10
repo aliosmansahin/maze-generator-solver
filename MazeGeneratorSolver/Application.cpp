@@ -170,7 +170,7 @@ void Application::Update()
     /* We update maze only each <mazeUpdateInterval> seconds */
     bool updateMaze = false;
 
-    if (!phaseCompleted && (currentPhase == Utils::Phase::Generation || currentPhase == Utils::Phase::Solving || currentPhase == Utils::Phase::CellSelection)) {
+    if (!phaseCompleted && (currentPhase == Utils::Phase::Generation || currentPhase == Utils::Phase::Solving || currentPhase == Utils::Phase::CellSelection || currentPhase == Utils::Phase::Completed)) {
         float currentTime = static_cast<float>(glfwGetTime());
 
         if (currentTime - lastMazeUpdateTime >= mazeUpdateInterval) {
@@ -193,7 +193,14 @@ void Application::Update()
             (currentPhase == Utils::Phase::Solving && maze->IsSolvingComplete()) ||
             (currentPhase == Utils::Phase::CellSelection && maze->IsSelectionComplete())) {
 
-            phaseCompleted = true;
+            if (maze->IsSolvingComplete()) {
+                currentPhase = Utils::GetNextPhase(currentPhase);
+                std::cout << "Phase: Completed" << std::endl;
+                HandlePhaseCompleted();
+            }
+            else {
+                phaseCompleted = true;
+            }
         }
 
 		leftMouseClickedLocal = false;
@@ -265,7 +272,8 @@ void Application::HandlePhaseSolving()
 void Application::HandlePhaseCompleted()
 {
     /* Maze completed handling */
-	phaseCompleted = true;
+    if (maze)
+        maze->CompleteMaze();
 }
 
 void Application::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)

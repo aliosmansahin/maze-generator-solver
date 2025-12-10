@@ -93,4 +93,15 @@ namespace Utils {
 		return false;
 	}
 
+	inline std::vector<Entrance> GetOncePassedEntrances(const std::vector<Entrance>& entrances) {
+		std::vector<Entrance> oncePassedEntrances;
+
+		for (const auto& entrance : entrances) {
+			if (entrance.passCount == 1) {
+				oncePassedEntrances.push_back(entrance);
+			}
+		}
+
+		return oncePassedEntrances;
+	}
 }

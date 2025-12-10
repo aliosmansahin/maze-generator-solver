@@ -168,16 +168,16 @@ void Maze::UpdateSolving()
 	std::vector<Utils::Direction> movableDirections;
 	bool movable = true;
 
-	for(int i = 0; i < 4; ++i) {
+	for (int i = 0; i < 4; ++i) {
 		int nextX = currentSolveCell.x + Utils::GetDirection(i).first;
 		int nextY = currentSolveCell.y + Utils::GetDirection(i).second;
-		if(nextX >= 0 && nextX < width && nextY >= 0 && nextY < height && grid[nextY][nextX]) {
+		if (nextX >= 0 && nextX < width && nextY >= 0 && nextY < height && grid[nextY][nextX]) {
 			movableDirections.push_back(Utils::GetDirection(i));
 		}
 	}
 
 	Utils::Direction nextDirection{};
-	
+
 	/* Decide the direction we will move */
 	if (movableDirections.size() <= 2) {
 		/* We are in a passage */
@@ -203,7 +203,7 @@ void Maze::UpdateSolving()
 		/* Get passed entrances */
 		std::vector<Utils::Direction> unpassedDirections;
 
-		/* TODO: Set those variables */
+		/* Set those variables */
 		bool isOnlyPassedPrevious = true;
 		bool isAllEntrancesPassed = true;
 
@@ -213,6 +213,12 @@ void Maze::UpdateSolving()
 			nextCell.y = currentSolveCell.y + direction.second;
 			if (!Utils::IsPassedEntrance(passedEntrances, nextCell)) {
 				unpassedDirections.push_back(direction);
+
+				isAllEntrancesPassed = false;
+			}
+			else {
+				if (nextCell != previousCell)
+					isOnlyPassedPrevious = false;
 			}
 		}
 		if (isOnlyPassedPrevious) {
@@ -224,9 +230,10 @@ void Maze::UpdateSolving()
 				std::cout << "---IsOnlyPassedPrevious" << std::endl;
 			}
 		}
-		else if (isAllEntrancesPassed) {
+		else if (isAllEntrancesPassed && Utils::GetPassCount(passedEntrances, previousCell) < 2) {
 			/* All entrances are passed, go back */
-			nextDirection = Utils::GetInvertedDirection(currentDirection);
+			Utils::Direction invDirection = Utils::GetInvertedDirection(currentDirection);
+			nextDirection = invDirection;
 			std::cout << "---IsAllEntrancesPassed" << std::endl;
 		}
 		else {
@@ -270,6 +277,16 @@ void Maze::UpdateSolving()
 		currentSolveCell.x += currentDirection.first;
 		currentSolveCell.y += currentDirection.second;
 	}
+
+	/* If we reach the finish */
+	if (currentSolveCell == solveEndCell) {
+		solving = false;
+		solvingComplete = true;
+	}
+}
+
+void Maze::UpdateCompletion()
+{
 }
 
 void Maze::SolveMaze()
@@ -285,6 +302,14 @@ void Maze::SolveMaze()
 	passedEntrances.clear();
 }
 
+void Maze::CompleteMaze()
+{
+	/* Get the entrances that only passed once */
+	oncePassedEntrances = Utils::GetOncePassedEntrances(passedEntrances);
+
+	/* TODO: Draw the path to solve */
+}
+
 void Maze::UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked)
 {
 	if(generating && !generationComplete) {
@@ -295,6 +320,9 @@ void Maze::UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked)
 	}
 	if(solving && !solvingComplete) {
 		UpdateSolving();
+	}
+	if (completing && !completingComplete) {
+		UpdateCompletion();
 	}
 }
 
@@ -373,6 +401,7 @@ void Maze::InitializeGrid()
 	/* Setup the variables */
 	generating = false;
 	generationComplete = false;
+	generationStack.clear();
 	solving = false;
 	solvingComplete = false;
 	pointing = false;
@@ -381,6 +410,12 @@ void Maze::InitializeGrid()
 	selectionPhase = Utils::SelectionPhase::SelectingStart;
 	hasSolveStartCell = false;
 	hasSolveEndCell = false;
+	passedEntrances.clear();
+	solvePath.clear();
+	completing = false;
+	completingComplete = false;
+	oncePassedEntrances.clear();
+	
 
 	/* Allocate memory for grid */
 	grid = new bool* [height];

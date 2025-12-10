@@ -39,10 +39,12 @@ public:
 	void GenerateMaze();
 	void StartSelection();
 	void SolveMaze();
+	void CompleteMaze();
 
 	void UpdateGeneration(); //	Iterative step for generation
 	void UpdateSelection(int mouseX, int mouseY, bool leftMouseClicked);  // Update selection process
 	void UpdateSolving();    // Iterative step for solving
+	void UpdateCompletion(); // Iteratice step for completion
 
 	void UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked);
 	void DrawMaze(unsigned int shaderProgram);
@@ -52,7 +54,6 @@ public:
 	bool IsGenerationComplete() const { return generationComplete; }
 	bool IsSolvingComplete() const { return solvingComplete; }
 	bool IsSelectionComplete() const { return selectionComplete; }
-
 private:
 	void InitializeGrid();
 	void CleanupGrid();
@@ -87,6 +88,14 @@ private:
 	Utils::Direction currentDirection;
 
 	std::vector<Utils::Entrance> passedEntrances;
+
+private:
+	/* Variables to complete the maze */
+	bool completing = false;
+	bool completingComplete = false;
+	
+	std::vector<Utils::Cell> solvePath;
+	std::vector<Utils::Entrance> oncePassedEntrances;
 
 private:
 	/* Those are user selected */
