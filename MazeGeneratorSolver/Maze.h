@@ -48,7 +48,7 @@ public:
 
 	void UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked);
 	void DrawMaze(unsigned int shaderProgram);
-	void DrawCell(unsigned int shaderProgram, float r, float g, float b, Utils::Cell cell);
+	void DrawCell(unsigned int shaderProgram, float r, float g, float b, std::shared_ptr<Utils::Cell> cell);
 	void PrintMaze(); // For debugging purposes, It prints the maze to console
 
 	bool IsGenerationComplete() const { return generationComplete; }
@@ -59,8 +59,8 @@ private:
 	void CleanupGrid();
 
 private:
-	void GenerateStep(Utils::Cell cell); // A single recursive step in maze generation
-
+	void GenerateStep(std::shared_ptr<Utils::Cell> cell); // A single recursive step in maze generation
+	
 private:
 	float* GenerateGridVertices(float gridW, float gridH);
 
@@ -68,44 +68,44 @@ private:
 	const int width;
     const int height;
 
-	bool** grid = nullptr;
+	std::vector<std::vector<std::shared_ptr<Utils::Cell>>> grid; //Hold all grid
 
 private:
 	/* Variables to generate the maze */
 	bool generating = false;
 	bool generationComplete = false;
 
-	Utils::Cell startCell; // Starting point for maze generation
-	Utils::Cell currentCell; // Current cell being processed
-	std::vector<Utils::Cell> generationStack; // Stack for iterative generation
+	std::shared_ptr<Utils::Cell> startCell; // Starting point for maze generation
+	std::shared_ptr<Utils::Cell> currentCell; // Current cell being processed
+	std::vector<std::shared_ptr<Utils::Cell>> generationStack; // Stack for iterative generation
 
 private:
 	/* Variables to solve the maze */
 	bool solving = false;
 	bool solvingComplete = false;
 
-	Utils::Cell currentSolveCell; // Current cell being processed in solving
+	std::shared_ptr<Utils::Cell> currentSolveCell; // Current cell being processed in solving
 	Utils::Direction currentDirection;
 
-	std::vector<Utils::Entrance> passedEntrances;
+	std::vector<std::shared_ptr<Utils::Entrance>> passedEntrances;
 
 private:
 	/* Variables to complete the maze */
 	bool completing = false;
 	bool completingComplete = false;
 	
-	std::vector<Utils::Cell> solvePath;
-	std::vector<Utils::Entrance> oncePassedEntrances;
+	std::vector<std::shared_ptr<Utils::Cell>> solvePath;
+	std::vector<std::shared_ptr<Utils::Entrance>> oncePassedEntrances;
 
 private:
 	/* Those are user selected */
-	Utils::Cell solveStartCell; // Starting point for maze solving
+	std::shared_ptr<Utils::Cell> solveStartCell; // Starting point for maze solving
 	bool hasSolveStartCell = false;
 
-	Utils::Cell solveEndCell;   // Ending point for maze solving
+	std::shared_ptr<Utils::Cell> solveEndCell;   // Ending point for maze solving
 	bool hasSolveEndCell = false;
 
-	Utils::Cell pointedCell; // Currently pointed cell by mouse
+	std::shared_ptr<Utils::Cell> pointedCell; // Currently pointed cell by mouse
 	bool pointing = false;
 
 	bool selectingCells = false; // Flag to indicate if we are in cell selection mode

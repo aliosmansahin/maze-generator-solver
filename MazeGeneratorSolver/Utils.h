@@ -39,13 +39,15 @@ namespace Utils {
 	}
 
 	struct Cell {
-		int x;
-		int y;
+		int x = 0;
+		int y = 0;
+		bool isWall = true;
 
 		inline Cell operator+=(const Cell& current) {
 			Cell cell;
 			cell.x = x + current.x;
 			cell.y = y + current.y;
+			cell.isWall = current.isWall;
 			return cell;
 		}
 		inline bool operator==(const Cell& other) const {
@@ -57,47 +59,47 @@ namespace Utils {
 	};
 
 	struct Entrance {
-		struct Cell cell;
+		std::shared_ptr<Cell> cell;
 		int passCount = 1;
 
-		Entrance(Cell cell) : cell(cell) {}
+		Entrance(std::shared_ptr<Cell> cell) : cell(cell) {}
 	};
 
-	inline int GetPassCount(const std::vector<Entrance>& entrances, Cell cell) {
+	inline int GetPassCount(const std::vector<std::shared_ptr<Entrance>>& entrances, std::shared_ptr<Cell> cell) {
 		for (const auto& entrance : entrances) {
-			if (entrance.cell == cell) {
-				return entrance.passCount;
+			if (entrance->cell == cell) {
+				return entrance->passCount;
 			}
 		}
 		return 0;
 	}
 
-	inline void PassOnEntrance(std::vector<Entrance>& entrances, Cell cell) {
+	inline void PassOnEntrance(std::vector<std::shared_ptr<Entrance>>& entrances, std::shared_ptr<Cell> cell) {
 		for (auto& entrance : entrances) {
-			if (entrance.cell == cell) {
-				entrance.passCount++;
+			if (entrance->cell == cell) {
+				entrance->passCount++;
 				return;
 			}
 		}
-		entrances.push_back(Entrance(cell));
+		entrances.push_back(std::make_shared<Entrance>(cell));
 
-		std::cout << "Passed on entrance at (" << cell.x << ", " << cell.y << "), total passes: " << GetPassCount(entrances, cell) << "\n";
+		std::cout << "Passed on entrance at (" << cell->x << ", " << cell->y << "), total passes: " << GetPassCount(entrances, cell) << "\n";
 	}
 
-	inline bool IsPassedEntrance(const std::vector<Entrance>& entrances, Cell cell) {
+	inline bool IsPassedEntrance(const std::vector<std::shared_ptr<Entrance>>& entrances, std::shared_ptr<Cell> cell) {
 		for (const auto& entrance : entrances) {
-			if (entrance.cell == cell) {
+			if (entrance->cell == cell) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	inline std::vector<Entrance> GetOncePassedEntrances(const std::vector<Entrance>& entrances) {
-		std::vector<Entrance> oncePassedEntrances;
+	inline std::vector<std::shared_ptr<Entrance>> GetOncePassedEntrances(const std::vector<std::shared_ptr<Entrance>>& entrances) {
+		std::vector<std::shared_ptr<Entrance>> oncePassedEntrances;
 
 		for (const auto& entrance : entrances) {
-			if (entrance.passCount == 1) {
+			if (entrance->passCount == 1) {
 				oncePassedEntrances.push_back(entrance);
 			}
 		}
