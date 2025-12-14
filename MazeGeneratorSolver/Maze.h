@@ -97,6 +97,13 @@ private:
 	/* Variables to complete the maze */
 	bool completing = false;
 	bool completingComplete = false;
+
+	bool inJunction = true; //If currentCompleteCell is in a junction
+
+	Utils::Direction startDirection;
+	Utils::Direction currentCompletionDirection;
+
+	std::shared_ptr<Utils::Cell> currentCompleteCell;
 	
 	std::vector<std::shared_ptr<Utils::Cell>> solvePath;
 	std::vector<std::shared_ptr<Utils::Entrance>> oncePassedEntrances;

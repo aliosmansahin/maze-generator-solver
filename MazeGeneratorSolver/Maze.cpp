@@ -310,6 +310,11 @@ void Maze::UpdateSolving()
 
 	/* Mode the current cell */
 	if (movable) {
+
+		/* To prevent wrong direction selection in completion phase */
+		if (currentSolveCell == solveStartCell)
+			startDirection = currentDirection;
+
 		currentSolveCell = grid[currentSolveCell->y + currentDirection.second][currentSolveCell->x + currentDirection.first];
 	}
 
@@ -324,6 +329,14 @@ void Maze::UpdateSolving()
 
 void Maze::UpdateCompletion()
 {
+	/*if (inJunction) {
+
+	}
+	else {
+		
+	}*/
+
+	//currentCompleteCell = grid[currentCompleteCell->y + currentCompletionDirection.second][currentCompleteCell->x + currentCompletionDirection.first];
 }
 
 void Maze::SolveMaze()
@@ -343,8 +356,8 @@ void Maze::CompleteMaze()
 {
 	/* Get the entrances that only passed once */
 	oncePassedEntrances = Utils::GetOncePassedEntrances(passedEntrances);
-
-	/* TODO: Draw the path to solve */
+	inJunction = true; //Think like the start point is a junction too
+	currentCompletionDirection = startDirection;
 }
 
 void Maze::UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked)
