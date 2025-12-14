@@ -60,6 +60,9 @@ private:
 
 private:
 	void GenerateStep(std::shared_ptr<Utils::Cell> cell); // A single recursive step in maze generation
+
+private:
+	void FixNeighborJunctions();
 	
 private:
 	float* GenerateGridVertices(float gridW, float gridH);
@@ -69,6 +72,7 @@ private:
     const int height;
 
 	std::vector<std::vector<std::shared_ptr<Utils::Cell>>> grid; //Hold all grid
+	std::vector<std::shared_ptr<Utils::Cell>> junctions; //Hold all junctions
 
 private:
 	/* Variables to generate the maze */

@@ -42,6 +42,40 @@ void Maze::GenerateStep(std::shared_ptr<Utils::Cell> cell)
 	}
 }
 
+void Maze::FixNeighborJunctions()
+{
+	for (int i = 0; i < junctions.size(); ++i) {
+		const auto j0 = junctions[i];
+
+		for (int j = i + 1; j < junctions.size(); ++j) {
+			const auto j1 = junctions[j];
+
+			int distX = j0->x - j1->x;
+			int distY = j0->y - j1->y;
+
+			if (abs(distX) <= 2 && abs(distY) <= 2) {
+				std::cout << j0->x << "," << j0->y << " " << j1->x << "," << j1->y << std::endl;
+
+				int entX = (j0->x + j1->x) / 2;
+				int entY = (j0->y + j1->y) / 2;
+
+				auto entrance = std::find_if(passedEntrances.begin(), passedEntrances.end(), [&entX, &entY](const std::shared_ptr<Utils::Entrance>& entrance) {
+					return entrance->cell->x == entX && entrance->cell->y == entY;
+				});
+
+				if (entrance == passedEntrances.end())
+					continue;
+
+				if (entrance->get()->cell->isWall)
+					continue;
+
+				if (entrance->get()->passCount == 2)
+					entrance->get()->passCount = 1;
+			}
+		}
+	}
+}
+
 /*
 WARNING: Use delete[] after usage to avoid memory leaks.
 */
@@ -157,6 +191,7 @@ void Maze::UpdateSelection(int mouseX, int mouseY, bool leftMouseClicked)
 			solveEndCell = pointedCell;
 			hasSolveEndCell = true;
 			selectionComplete = true;
+			selectingCells = false;
 			std::cout << "End Cell Selected at (" << solveEndCell->x << ", " << solveEndCell->y << ")\n";
 		}
 	}
@@ -192,6 +227,12 @@ void Maze::UpdateSolving()
 	else {
 		/* We are in a junction */
 		std::cout << "Junction at (" << currentSolveCell->x << ", " << currentSolveCell->y << ")\n";
+
+		/* Store this junction cell */
+		auto junction = std::find(junctions.begin(), junctions.end(), currentSolveCell);
+
+		if(junction == junctions.end())
+			junctions.push_back(currentSolveCell);
 
 		/* Pass the previous entrance */
 		std::shared_ptr<Utils::Cell> previousCell = grid
@@ -274,6 +315,8 @@ void Maze::UpdateSolving()
 
 	/* If we reach the finish */
 	if (currentSolveCell == solveEndCell) {
+		FixNeighborJunctions();
+
 		solving = false;
 		solvingComplete = true;
 	}
