@@ -170,7 +170,11 @@ void Application::Update()
     /* We update maze only each <mazeUpdateInterval> seconds */
     bool updateMaze = false;
 
-    if (!phaseCompleted && (currentPhase == Utils::Phase::Generation || currentPhase == Utils::Phase::Solving || currentPhase == Utils::Phase::CellSelection || currentPhase == Utils::Phase::Completed)) {
+    if (!phaseCompleted &&
+        (currentPhase == Utils::Phase::Generation ||
+            currentPhase == Utils::Phase::Solving ||
+            currentPhase == Utils::Phase::CellSelection ||
+            currentPhase == Utils::Phase::Completed)) {
         float currentTime = static_cast<float>(glfwGetTime());
 
         if (currentTime - lastMazeUpdateTime >= mazeUpdateInterval) {
@@ -194,6 +198,7 @@ void Application::Update()
             (currentPhase == Utils::Phase::CellSelection && maze->IsSelectionComplete())) {
 
             if (maze->IsSolvingComplete()) {
+                phaseCompleted = false;
                 currentPhase = Utils::GetNextPhase(currentPhase);
                 std::cout << "Phase: Completed" << std::endl;
                 HandlePhaseCompleted();

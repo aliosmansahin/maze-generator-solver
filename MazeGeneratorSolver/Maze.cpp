@@ -218,7 +218,7 @@ void Maze::UpdateSolving()
 		/* We are in a passage */
 
 		if (movableDirections.size() == 2) {
-			/* We are in a dead-end */
+			/* Only go forward */
 			std::remove(movableDirections.begin(), movableDirections.end(), Utils::GetInvertedDirection(currentDirection));
 		}
 
@@ -329,14 +329,65 @@ void Maze::UpdateSolving()
 
 void Maze::UpdateCompletion()
 {
-	/*if (inJunction) {
+	/* Get movable direction of the current cell */
+	std::vector<Utils::Direction> movableDirections;
 
+	for (int i = 0; i < 4; ++i) {
+		int nextX = currentCompleteCell->x + Utils::GetDirection(i).first;
+		int nextY = currentCompleteCell->y + Utils::GetDirection(i).second;
+		if (nextX >= 0 && nextX < width && nextY >= 0 && nextY < height && !grid[nextY][nextX]->isWall) {
+			movableDirections.push_back(Utils::GetDirection(i));
+		}
+	}
+
+	Utils::Direction nextDirection{};
+
+	/* Decide the direction we will move */
+	if (movableDirections.size() <= 2) {
+		/* We are in a passage */
+
+		if (movableDirections.size() == 2) {
+			/* Only go forward */
+			std::remove(movableDirections.begin(), movableDirections.end(), Utils::GetInvertedDirection(currentCompletionDirection));
+		}
+
+		nextDirection = movableDirections[0];
 	}
 	else {
-		
-	}*/
+		/*	
+			We are in a junction
+			We will move on the once passed entrance
+		*/
 
-	//currentCompleteCell = grid[currentCompleteCell->y + currentCompletionDirection.second][currentCompleteCell->x + currentCompletionDirection.first];
+		/* Remove our backward to make our once passed entrances only one */
+		std::remove(movableDirections.begin(), movableDirections.end(), Utils::GetInvertedDirection(currentCompletionDirection));
+
+		for (const auto& direction : movableDirections) {
+			/* Get next cell in the direcion */
+			std::shared_ptr<Utils::Cell> nextCell = grid[currentCompleteCell->y + direction.second][currentCompleteCell->x + direction.first];
+			if (Utils::IsOncePassedEntrance(passedEntrances, nextCell)) {
+				/* We will move on this direction */
+				nextDirection = direction;
+
+				break;
+			}
+		}
+	}
+
+	currentCompletionDirection = nextDirection;
+
+	currentCompleteCell = grid[currentCompleteCell->y + currentCompletionDirection.second][currentCompleteCell->x + currentCompletionDirection.first];
+
+	/* We have reached to end */
+	if (currentCompleteCell == solveEndCell) {
+		completing = false;
+		completingComplete = true;
+
+		std::cout << "Displayed solve path" << std::endl;
+		return;
+	}
+
+	solvePath.push_back(currentCompleteCell);
 }
 
 void Maze::SolveMaze()
@@ -354,10 +405,19 @@ void Maze::SolveMaze()
 
 void Maze::CompleteMaze()
 {
+	completing = true;
+	completingComplete = false;
+
 	/* Get the entrances that only passed once */
 	oncePassedEntrances = Utils::GetOncePassedEntrances(passedEntrances);
 	inJunction = true; //Think like the start point is a junction too
+
+	std::cout << "Maze Completion Started from (" << solveStartCell->x << ", " << solveStartCell->y << ") to (" << solveEndCell->x << ", " << solveEndCell->y << ")\n";
+
+	/* Start solve path */
 	currentCompletionDirection = startDirection;
+	//currentCompleteCell = grid[solveStartCell->y + currentCompletionDirection.second][solveStartCell->x + currentCompletionDirection.first];
+	currentCompleteCell = solveStartCell;
 }
 
 void Maze::UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked)
@@ -393,18 +453,25 @@ void Maze::DrawMaze(unsigned int shaderProgram)
 	if(selectingCells && pointing)
 		DrawCell(shaderProgram, 1.0f, 0.0f, 0.0f, pointedCell);
 
+	for (const auto& passedEntrance : passedEntrances) {
+		if (passedEntrance->passCount == 1)
+			DrawCell(shaderProgram, 0.0f, 1.0f, 1.0f, passedEntrance->cell);
+		else if (passedEntrance->passCount == 2)
+			DrawCell(shaderProgram, 0.5f, 0.5f, 0.5f, passedEntrance->cell);
+	}
+
+	for (const auto& solvePathCell : solvePath) {
+		DrawCell(shaderProgram, 0.0f, 0.0f, 0.7f, solvePathCell);
+	}
+
 	if(hasSolveStartCell)
 		DrawCell(shaderProgram, 0.0f, 0.0f, 1.0f, solveStartCell);
 
 	if (hasSolveEndCell)
 		DrawCell(shaderProgram, 1.0f, 1.0f, 0.0f, solveEndCell);
 
-	for (const auto& passedEntrance : passedEntrances) {
-		if(passedEntrance->passCount == 1)
-			DrawCell(shaderProgram, 0.0f, 1.0f, 1.0f, passedEntrance->cell);
-		else if(passedEntrance->passCount == 2)
-			DrawCell(shaderProgram, 0.5f, 0.5f, 0.5f, passedEntrance->cell);
-	}
+	if (completing)
+		DrawCell(shaderProgram, 0.5f, 0.0f, 0.0f, currentCompleteCell);
 
 	if (solving)
 		DrawCell(shaderProgram, 1.0f, 0.0f, 1.0f, currentSolveCell);

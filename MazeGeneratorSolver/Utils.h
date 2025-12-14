@@ -15,7 +15,7 @@ namespace Utils {
 	};
 
 	inline Phase GetNextPhase(Phase currentPhase) {
-		return static_cast<Phase>((static_cast<int>(currentPhase) + 1) % 4);
+		return static_cast<Phase>((static_cast<int>(currentPhase) + 1) % 5);
 	}
 
 	enum class SelectionPhase
@@ -89,6 +89,15 @@ namespace Utils {
 	inline bool IsPassedEntrance(const std::vector<std::shared_ptr<Entrance>>& entrances, std::shared_ptr<Cell> cell) {
 		for (const auto& entrance : entrances) {
 			if (entrance->cell == cell) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	inline bool IsOncePassedEntrance(const std::vector<std::shared_ptr<Entrance>>& entrances, std::shared_ptr<Cell> cell) {
+		for (const auto& entrance : entrances) {
+			if (entrance->cell == cell && entrance->passCount == 1) {
 				return true;
 			}
 		}
