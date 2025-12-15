@@ -47,8 +47,8 @@ public:
 	void UpdateCompletion(); // Iteratice step for completion
 
 	void UpdateMaze(int mouseX, int mouseY, float cameraX, float cameraY, float cameraZoom, bool leftMouseClicked);
-	void DrawMaze(unsigned int shaderProgram, int cameraX, int cameraY);
-	void DrawCell(unsigned int shaderProgram, int cameraX, int cameraY, float r, float g, float b, std::shared_ptr<Utils::Cell> cell);
+	void DrawMaze(unsigned int shaderProgram, float cameraX, float cameraY);
+	void DrawCell(unsigned int shaderProgram, float cameraX, float cameraY, float r, float g, float b, std::shared_ptr<Utils::Cell> cell);
 	void PrintMaze(); // For debugging purposes, It prints the maze to console
 
 	bool IsGenerationComplete() const { return generationComplete; }

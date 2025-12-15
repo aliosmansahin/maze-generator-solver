@@ -104,5 +104,5 @@ private:
 	float cameraZoom = 1.0f;
 
 	float lastMazeUpdateTime = 0.0f;
-	float mazeUpdateInterval = SIMULATION_INTERVAL;
+	float mazeUpdateInterval = (float)SIMULATION_INTERVAL;
 };

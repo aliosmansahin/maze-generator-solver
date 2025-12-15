@@ -278,7 +278,7 @@ void Maze::UpdateSolving()
 
 		if (movableDirections.size() == 2) {
 			/* Only go forward */
-			std::remove(movableDirections.begin(), movableDirections.end(), Utils::GetInvertedDirection(currentDirection));
+			std::erase(movableDirections, Utils::GetInvertedDirection(currentDirection));
 		}
 
 		nextDirection = movableDirections[0];
@@ -393,7 +393,7 @@ void Maze::UpdateCompletion()
 
 		if (movableDirections.size() == 2) {
 			/* Only go forward */
-			std::remove(movableDirections.begin(), movableDirections.end(), Utils::GetInvertedDirection(currentCompletionDirection));
+			std::erase(movableDirections, Utils::GetInvertedDirection(currentCompletionDirection));
 		}
 
 		nextDirection = movableDirections[0];
@@ -405,7 +405,7 @@ void Maze::UpdateCompletion()
 		*/
 
 		/* Remove our backward to make our once passed entrances only one */
-		std::remove(movableDirections.begin(), movableDirections.end(), Utils::GetInvertedDirection(currentCompletionDirection));
+		std::erase(movableDirections, Utils::GetInvertedDirection(currentCompletionDirection));
 
 		for (const auto& direction : movableDirections) {
 			/* Get next cell in the direcion */
@@ -477,7 +477,7 @@ void Maze::UpdateMaze(int mouseX, int mouseY, float cameraX, float cameraY, floa
 	}
 }
 
-void Maze::DrawMaze(unsigned int shaderProgram, int cameraX, int cameraY)
+void Maze::DrawMaze(unsigned int shaderProgram, float cameraX, float cameraY)
 {
 	for(int y = 0; y < height; ++y) {
 		for(int x = 0; x < width; ++x) {
@@ -525,7 +525,7 @@ PURPOSE: Draws a single cell at given position with specified color.
 	This function sends the color of the cell to the fragment shader
 	to avoid creating multiple VAOs for different colors.
 */
-void Maze::DrawCell(unsigned int shaderProgram, int cameraX, int cameraY, float r, float g, float b, std::shared_ptr<Utils::Cell> cell)
+void Maze::DrawCell(unsigned int shaderProgram, float cameraX, float cameraY, float r, float g, float b, std::shared_ptr<Utils::Cell> cell)
 {
 	/* Send translation matrix */
 	int translateX = cell->x * cellHalfSize * 2;

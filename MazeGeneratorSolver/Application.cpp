@@ -369,8 +369,8 @@ void Application::MouseButtonCallback(GLFWwindow* window, int button, int action
 
 void Application::MousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
-	mouseX = xpos - WINDOW_WIDTH / 2.0f;
-	mouseY = WINDOW_HEIGHT - ypos - WINDOW_HEIGHT / 2.0f;
+	mouseX = (int)(xpos - (double)WINDOW_WIDTH / 2.0);
+	mouseY = (int)((double)WINDOW_HEIGHT - ypos - (double)WINDOW_HEIGHT / 2.0);
 }
 
 void Application::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
