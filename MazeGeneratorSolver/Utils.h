@@ -82,8 +82,6 @@ namespace Utils {
 			}
 		}
 		entrances.push_back(std::make_shared<Entrance>(cell));
-
-		std::cout << "Passed on entrance at (" << cell->x << ", " << cell->y << "), total passes: " << GetPassCount(entrances, cell) << "\n";
 	}
 
 	inline bool IsPassedEntrance(const std::vector<std::shared_ptr<Entrance>>& entrances, std::shared_ptr<Cell> cell) {

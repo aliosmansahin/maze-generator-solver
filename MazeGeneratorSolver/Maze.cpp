@@ -69,8 +69,6 @@ void Maze::FixNeighborJunctions()
 			int distY = j0->y - j1->y;
 
 			if (abs(distX) <= 2 && abs(distY) <= 2) {
-				std::cout << j0->x << "," << j0->y << " " << j1->x << "," << j1->y << std::endl;
-
 				int entX = (j0->x + j1->x) / 2;
 				int entY = (j0->y + j1->y) / 2;
 
@@ -250,8 +248,7 @@ void Maze::UpdateSolving()
 	}
 	else {
 		/* We are in a junction */
-		std::cout << "Junction at (" << currentSolveCell->x << ", " << currentSolveCell->y << ")\n";
-
+		
 		/* Store this junction cell */
 		auto junction = std::find(junctions.begin(), junctions.end(), currentSolveCell);
 
@@ -290,15 +287,12 @@ void Maze::UpdateSolving()
 			if (!unpassedDirections.empty()) {
 				int selectedIndex = rand() % unpassedDirections.size();
 				nextDirection = unpassedDirections[selectedIndex];
-
-				std::cout << "---IsOnlyPassedPrevious" << std::endl;
 			}
 		}
 		else if (isAllEntrancesPassed && Utils::GetPassCount(passedEntrances, previousCell) < 2) {
 			/* All entrances are passed, go back */
 			Utils::Direction invDirection = Utils::GetInvertedDirection(currentDirection);
 			nextDirection = invDirection;
-			std::cout << "---IsAllEntrancesPassed" << std::endl;
 		}
 		else {
 			/* Select any entrance with the fewest passed */
@@ -320,8 +314,6 @@ void Maze::UpdateSolving()
 			if (!leastPassedDirections.empty()) {
 				int selectedIndex = rand() % leastPassedDirections.size();
 				nextDirection = leastPassedDirections[selectedIndex];
-
-				std::cout << "---TheFewestEntrance" << std::endl;
 			}
 		}
 
