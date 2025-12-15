@@ -196,15 +196,26 @@ void Maze::UpdateSelection(int mouseX, int mouseY, float cameraX, float cameraY,
 	if(leftMouseClicked && pointing && !selectionComplete) {
 		if(selectionPhase == Utils::SelectionPhase::SelectingStart) {
 			solveStartCell = pointedCell;
+
+			if(solveStartCell->isWall)
+				solveStartCell->isWall = false;
+			
 			hasSolveStartCell = true;
+			
 			selectionPhase = Utils::SelectionPhase::SelectingEnd;
 			std::cout << "Start Cell Selected at (" << solveStartCell->x << ", " << solveStartCell->y << ")\n";
 		}
 		else if(selectionPhase == Utils::SelectionPhase::SelectingEnd) {
 			solveEndCell = pointedCell;
+
+			if (solveEndCell->isWall)
+				solveEndCell->isWall = false;
+
 			hasSolveEndCell = true;
+
 			selectionComplete = true;
 			selectingCells = false;
+
 			std::cout << "End Cell Selected at (" << solveEndCell->x << ", " << solveEndCell->y << ")\n";
 		}
 	}
