@@ -381,7 +381,7 @@ void Maze::UpdateCompletion()
 	/* We have reached to end */
 	if (currentCompleteCell == solveEndCell) {
 		completing = false;
-		completingComplete = true;
+		completionComplete = true;
 
 		std::cout << "Displayed solve path" << std::endl;
 		return;
@@ -406,7 +406,8 @@ void Maze::SolveMaze()
 void Maze::CompleteMaze()
 {
 	completing = true;
-	completingComplete = false;
+	completionComplete = false;
+	solvingComplete = false;
 
 	/* Get the entrances that only passed once */
 	oncePassedEntrances = Utils::GetOncePassedEntrances(passedEntrances);
@@ -431,7 +432,7 @@ void Maze::UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked)
 	if(solving && !solvingComplete) {
 		UpdateSolving();
 	}
-	if (completing && !completingComplete) {
+	if (completing && !completionComplete) {
 		UpdateCompletion();
 	}
 }
@@ -531,7 +532,7 @@ void Maze::InitializeGrid()
 	passedEntrances.clear();
 	solvePath.clear();
 	completing = false;
-	completingComplete = false;
+	completionComplete = false;
 	oncePassedEntrances.clear();
 	
 	/* Allocate memory for grid */

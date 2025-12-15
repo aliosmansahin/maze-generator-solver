@@ -54,11 +54,16 @@ private:
 	void Update();
 	void Render();
 
+	/* Phase */
 	void HandlePhaseIdle();
 	void HandlePhaseGeneration();
 	void HandlePhaseCellSelection();
 	void HandlePhaseSolving();
 	void HandlePhaseCompleted();
+
+	void UpdatePhase();
+	bool IsCurrentPhaseCompleted();
+
 
 	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
@@ -84,5 +89,5 @@ private:
 	static int mouseY;
 
 	float lastMazeUpdateTime = 0.0f;
-	float mazeUpdateInterval = 0.01f; // Update maze every 0.01 seconds
+	float mazeUpdateInterval = SIMULATION_INTERVAL;
 };

@@ -54,6 +54,7 @@ public:
 	bool IsGenerationComplete() const { return generationComplete; }
 	bool IsSolvingComplete() const { return solvingComplete; }
 	bool IsSelectionComplete() const { return selectionComplete; }
+	bool IsCompletionComplete() const { return completionComplete; }
 private:
 	void InitializeGrid();
 	void CleanupGrid();
@@ -96,7 +97,7 @@ private:
 private:
 	/* Variables to complete the maze */
 	bool completing = false;
-	bool completingComplete = false;
+	bool completionComplete = false;
 
 	bool inJunction = true; //If currentCompleteCell is in a junction
 

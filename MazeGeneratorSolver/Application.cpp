@@ -102,7 +102,6 @@ void Application::InitializeShaders()
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
     glCompileShader(fragmentShader);
     
-
     int success;
     char infoLog[512];
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
@@ -137,34 +136,7 @@ void Application::Update()
 {
     /* Keyboard events */
     if (spacePressed && phaseCompleted) {
-        phaseCompleted = false;
-        currentPhase = GetNextPhase(currentPhase);
-
-        switch (currentPhase)
-        {
-        case Utils::Phase::Idle:
-            std::cout << "Phase: Idle" << std::endl;
-            HandlePhaseIdle();
-            break;
-        case Utils::Phase::Generation:
-            std::cout << "Phase: Generation" << std::endl;
-            HandlePhaseGeneration();
-            break;
-		case Utils::Phase::CellSelection:
-            std::cout << "Phase: Cell Selection" << std::endl;
-            HandlePhaseCellSelection();
-			break;
-        case Utils::Phase::Solving:
-            std::cout << "Phase: Solving" << std::endl;
-            HandlePhaseSolving();
-            break;
-        case Utils::Phase::Completed:
-            std::cout << "Phase: Completed" << std::endl;
-            HandlePhaseCompleted();
-            break;
-        default:
-            break;
-        }
+        UpdatePhase();
     }
 
     /* We update maze only each <mazeUpdateInterval> seconds */
@@ -193,15 +165,9 @@ void Application::Update()
 
     if (maze && updateMaze) {
         maze->UpdateMaze(mouseX, mouseY, leftMouseClickedLocal);
-        if ((currentPhase == Utils::Phase::Generation && maze->IsGenerationComplete()) ||
-            (currentPhase == Utils::Phase::Solving && maze->IsSolvingComplete()) ||
-            (currentPhase == Utils::Phase::CellSelection && maze->IsSelectionComplete())) {
-
+        if (IsCurrentPhaseCompleted()) {
             if (maze->IsSolvingComplete()) {
-                phaseCompleted = false;
-                currentPhase = Utils::GetNextPhase(currentPhase);
-                std::cout << "Phase: Completed" << std::endl;
-                HandlePhaseCompleted();
+                UpdatePhase();
             }
             else {
                 phaseCompleted = true;
@@ -279,6 +245,49 @@ void Application::HandlePhaseCompleted()
     /* Maze completed handling */
     if (maze)
         maze->CompleteMaze();
+}
+
+/*
+PURPOSE: Updates current phase by incrementing it
+*/
+void Application::UpdatePhase()
+{
+    phaseCompleted = false;
+    currentPhase = GetNextPhase(currentPhase);
+
+    switch (currentPhase)
+    {
+    case Utils::Phase::Idle:
+        std::cout << "Phase: Idle" << std::endl;
+        HandlePhaseIdle();
+        break;
+    case Utils::Phase::Generation:
+        std::cout << "Phase: Generation" << std::endl;
+        HandlePhaseGeneration();
+        break;
+    case Utils::Phase::CellSelection:
+        std::cout << "Phase: Cell Selection" << std::endl;
+        HandlePhaseCellSelection();
+        break;
+    case Utils::Phase::Solving:
+        std::cout << "Phase: Solving" << std::endl;
+        HandlePhaseSolving();
+        break;
+    case Utils::Phase::Completed:
+        std::cout << "Phase: Completed" << std::endl;
+        HandlePhaseCompleted();
+        break;
+    default:
+        break;
+    }
+}
+
+bool Application::IsCurrentPhaseCompleted()
+{
+    return (currentPhase == Utils::Phase::Generation && maze->IsGenerationComplete()) ||
+        (currentPhase == Utils::Phase::Solving && maze->IsSolvingComplete()) ||
+        (currentPhase == Utils::Phase::CellSelection && maze->IsSelectionComplete()) ||
+        (currentPhase == Utils::Phase::Completed && maze->IsCompletionComplete());
 }
 
 void Application::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
