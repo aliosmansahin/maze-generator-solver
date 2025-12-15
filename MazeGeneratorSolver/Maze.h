@@ -76,8 +76,8 @@ private:
 	std::shared_ptr<Utils::Cell> GetCellTowardsDirection(std::shared_ptr<Utils::Cell> cell, Utils::Direction direction, int multiply = 1);
 
 private:
-	const int width;
-    const int height;
+	int width;
+    int height;
 
 	std::vector<std::vector<std::shared_ptr<Utils::Cell>>> grid; //Hold all grid
 	std::vector<std::shared_ptr<Utils::Cell>> junctions; //Hold all junctions

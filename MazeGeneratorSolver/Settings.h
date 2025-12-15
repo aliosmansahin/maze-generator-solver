@@ -25,6 +25,13 @@ Change these values to modify the window dimensions and title used in the applic
 /* Change this value to set camera sensitivity */
 #define CAMERA_SENSITIVITY 1
 
+/*
+Change these values to edit maze width and height
+WARNING: Use odd numbers
+*/
+#define MAZE_WIDTH 41
+#define MAZE_HEIGHT 41
+
 /* ------- DEBUG ------- */
 
 //#define DEBUG_CLEAR_COLOR // Uncomment this line to enable debug clear color (red) during rendering.

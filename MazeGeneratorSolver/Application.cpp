@@ -242,7 +242,7 @@ void Application::HandlePhaseGeneration()
 {
     /* Create new maze */
     if (!maze) {
-        maze = new Maze(21, 21); // Example size
+        maze = new Maze(MAZE_WIDTH, MAZE_HEIGHT);
     }
 
     /* Start to generate */

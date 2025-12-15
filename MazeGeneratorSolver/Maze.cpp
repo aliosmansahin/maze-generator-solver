@@ -576,6 +576,13 @@ void Maze::InitializeGrid()
 	completing = false;
 	completionComplete = false;
 	
+	/* Make sure the maze size is odd */
+	if (width % 2 == 0)
+		width--;
+
+	if (height % 2 == 0)
+		height--;
+
 	/* Allocate memory for grid */
 	grid.resize(height);
 
