@@ -55,6 +55,7 @@ public:
 	bool IsSolvingComplete() const { return solvingComplete; }
 	bool IsSelectionComplete() const { return selectionComplete; }
 	bool IsCompletionComplete() const { return completionComplete; }
+
 private:
 	void InitializeGrid();
 	void CleanupGrid();
@@ -66,7 +67,13 @@ private:
 	void FixNeighborJunctions();
 	
 private:
+	/* Helpers */
 	float* GenerateGridVertices(float gridW, float gridH);
+	std::vector<Utils::Direction> GetMovableDirections(std::shared_ptr<Utils::Cell> cell);
+	
+	void SetCameraToFitMazeIntoScreen(float& cameraXAfterSet, float& cameraYAfterSet, float& cameraZoomAfterSet);
+	std::shared_ptr<Utils::Cell> GetCellFromXY(int x, int y);
+	std::shared_ptr<Utils::Cell> GetCellTowardsDirection(std::shared_ptr<Utils::Cell> cell, Utils::Direction direction, int multiply = 1);
 
 private:
 	const int width;
@@ -99,15 +106,12 @@ private:
 	bool completing = false;
 	bool completionComplete = false;
 
-	bool inJunction = true; //If currentCompleteCell is in a junction
-
 	Utils::Direction startDirection;
 	Utils::Direction currentCompletionDirection;
 
 	std::shared_ptr<Utils::Cell> currentCompleteCell;
 	
 	std::vector<std::shared_ptr<Utils::Cell>> solvePath;
-	std::vector<std::shared_ptr<Utils::Entrance>> oncePassedEntrances;
 
 private:
 	/* Those are user selected */

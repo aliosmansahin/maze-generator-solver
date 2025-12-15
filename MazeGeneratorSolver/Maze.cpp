@@ -6,25 +6,12 @@ void Maze::GenerateMaze(float& cameraXAfterSet, float& cameraYAfterSet, float& c
 	generationComplete = false;
 	generating = true;
 
-	/* Set camera position and zoom to fit maze into screen without any navigation process */
-	float mazeWorldWidth = cellHalfSize * 2.0f * width;
-	float mazeWorldHeight = cellHalfSize * 2.0f * height;
-
-	float zoomX = WINDOW_WIDTH / mazeWorldWidth * 0.8f;
-	float zoomY = WINDOW_HEIGHT / mazeWorldHeight * 0.8f;
-
-	cameraZoomAfterSet = (zoomX < zoomY) ? zoomX : zoomY;
-
-	float mazeCenterX = mazeWorldWidth / 2.0f - cellHalfSize;
-	float mazeCenterY = mazeWorldHeight / 2.0f - cellHalfSize;
-
-	cameraXAfterSet = mazeCenterX;
-	cameraYAfterSet = mazeCenterY;
+	SetCameraToFitMazeIntoScreen(cameraXAfterSet, cameraYAfterSet, cameraZoomAfterSet);
 
 	srand(static_cast<unsigned int>(time(nullptr)));
 
 	do {
-		startCell = grid[rand() % height][rand() % width];
+		startCell = GetCellFromXY(rand() % height, rand() % width);
 
 	} while (startCell->x % 2 == 0 || startCell->y % 2 == 0); // Ensure start cell is odd indexed
 
@@ -32,7 +19,7 @@ void Maze::GenerateMaze(float& cameraXAfterSet, float& cameraYAfterSet, float& c
 	// Instead, we will implement iterative generation in UpdateGeneration
 	// by pushing the start cell onto the stack
 
-	grid[startCell->y][startCell->x]->isWall = false; // Mark start cell as part of the maze
+	startCell->isWall = false; // Mark start cell as part of the maze
 	generationStack.push_back(startCell);
 
 	std::cout << "Maze Generation Started from (" << startCell->x << ", " << startCell->y << ")\n";
@@ -43,6 +30,7 @@ void Maze::StartSelection()
 	selectingCells = true;
 }
 
+/* UNUSED FUNCTION */
 void Maze::GenerateStep(std::shared_ptr<Utils::Cell> cell)
 {
 	grid[cell->y][cell->x]->isWall = false; // Mark cell as part of the maze
@@ -104,6 +92,59 @@ float* Maze::GenerateGridVertices(float gridW, float gridH)
 	return gridVertices;
 }
 
+std::vector<Utils::Direction> Maze::GetMovableDirections(std::shared_ptr<Utils::Cell> cell)
+{
+	std::vector<Utils::Direction> movableDirections;
+
+	for (int i = 0; i < 4; ++i) {
+		std::shared_ptr<Utils::Cell> nextCell = GetCellTowardsDirection(cell, Utils::GetDirection(i));
+
+		if (!nextCell)
+			continue;
+		
+		if (nextCell->isWall)
+			continue;
+
+		movableDirections.push_back(Utils::GetDirection(i));
+	}
+
+	return movableDirections;
+}
+
+/*
+PURPOSE: Set camera position and zoom to fit maze into screen without any navigation process
+*/
+void Maze::SetCameraToFitMazeIntoScreen(float& cameraXAfterSet, float& cameraYAfterSet, float& cameraZoomAfterSet)
+{
+	float mazeWorldWidth = cellHalfSize * 2.0f * width;
+	float mazeWorldHeight = cellHalfSize * 2.0f * height;
+
+	float zoomX = WINDOW_WIDTH / mazeWorldWidth * 0.8f;
+	float zoomY = WINDOW_HEIGHT / mazeWorldHeight * 0.8f;
+
+	cameraZoomAfterSet = (zoomX < zoomY) ? zoomX : zoomY;
+
+	float mazeCenterX = mazeWorldWidth / 2.0f - cellHalfSize;
+	float mazeCenterY = mazeWorldHeight / 2.0f - cellHalfSize;
+
+	cameraXAfterSet = mazeCenterX;
+	cameraYAfterSet = mazeCenterY;
+}
+
+std::shared_ptr<Utils::Cell> Maze::GetCellFromXY(int x, int y)
+{
+	if (x >= 0 && x <= width - 1 && y >= 0 && y <= height - 1) {
+		return grid[y][x];
+	}
+	else
+		return nullptr;
+}
+
+std::shared_ptr<Utils::Cell> Maze::GetCellTowardsDirection(std::shared_ptr<Utils::Cell> cell, Utils::Direction direction, int multiply)
+{
+	return GetCellFromXY(cell->x + direction.first * multiply, cell->y + direction.second * multiply);
+}
+
 void Maze::UpdateGeneration()
 {
 	/*
@@ -119,12 +160,15 @@ void Maze::UpdateGeneration()
 		// Find unvisited neighbors
 		std::vector<std::shared_ptr<Utils::Cell>> unvisitedNeighbors;
 		for (int i = 0; i < 4; ++i) {
-			int nextX = currentCell->x + Utils::GetDirection(i).first * 2;
-			int nextY = currentCell->y + Utils::GetDirection(i).second * 2;
+			std::shared_ptr<Utils::Cell> nextCell = GetCellTowardsDirection(currentCell, Utils::GetDirection(i), 2);
 
-			if(nextX >= 0 && nextX < width && nextY >= 0 && nextY < height && grid[nextY][nextX]->isWall) {
-				unvisitedNeighbors.push_back(grid[nextY][nextX]);
-			}
+			if (!nextCell)
+				continue;
+
+			if (!nextCell->isWall)
+				continue;
+
+			unvisitedNeighbors.push_back(nextCell);
 		}
 
 		if (!unvisitedNeighbors.empty()) {
@@ -136,9 +180,9 @@ void Maze::UpdateGeneration()
 			// Remove wall between current cell and selected neighbor
 			int wallX = (currentCell->x + selectedNeighbor->x) / 2;
 			int wallY = (currentCell->y + selectedNeighbor->y) / 2;
-			grid[wallY][wallX]->isWall = false;
+			GetCellFromXY(wallX, wallY)->isWall = false;
 
-			grid[selectedNeighbor->y][selectedNeighbor->x]->isWall = false;
+			selectedNeighbor->isWall = false;
 			generationStack.push_back(selectedNeighbor);
 		}
 	}
@@ -183,7 +227,7 @@ void Maze::UpdateSelection(int mouseX, int mouseY, float cameraX, float cameraY,
 
 	/* Set pointed cell if there is no issue from the checks */
 	if((!isWall || (isBound && !hasNeighborWall)) && mouseInsideMaze) {
-		pointedCell = grid[cellY][cellX];
+		pointedCell = grid[cellY][cellX]; //Checks have already been done before
 		pointing = true;
 	}
 	else {
@@ -221,17 +265,10 @@ void Maze::UpdateSelection(int mouseX, int mouseY, float cameraX, float cameraY,
 
 void Maze::UpdateSolving()
 {
-	/* Get movable direction of the current cell */
-	std::vector<Utils::Direction> movableDirections;
 	bool movable = true;
 
-	for (int i = 0; i < 4; ++i) {
-		int nextX = currentSolveCell->x + Utils::GetDirection(i).first;
-		int nextY = currentSolveCell->y + Utils::GetDirection(i).second;
-		if (nextX >= 0 && nextX < width && nextY >= 0 && nextY < height && !grid[nextY][nextX]->isWall) {
-			movableDirections.push_back(Utils::GetDirection(i));
-		}
-	}
+	/* Get movable direction of the current cell */
+	std::vector<Utils::Direction> movableDirections = GetMovableDirections(currentSolveCell);
 
 	Utils::Direction nextDirection{};
 
@@ -256,9 +293,7 @@ void Maze::UpdateSolving()
 			junctions.push_back(currentSolveCell);
 
 		/* Pass the previous entrance */
-		std::shared_ptr<Utils::Cell> previousCell = grid
-			[currentSolveCell->y + Utils::GetInvertedDirection(currentDirection).second]
-			[currentSolveCell->x + Utils::GetInvertedDirection(currentDirection).first];
+		std::shared_ptr<Utils::Cell> previousCell = GetCellTowardsDirection(currentSolveCell, Utils::GetInvertedDirection(currentDirection));
 
 		Utils::PassOnEntrance(passedEntrances, previousCell);
 
@@ -270,7 +305,7 @@ void Maze::UpdateSolving()
 		bool isAllEntrancesPassed = true;
 
 		for (const auto& direction : movableDirections) {
-			std::shared_ptr<Utils::Cell> nextCell = grid[currentSolveCell->y + direction.second][currentSolveCell->x + direction.first];
+			std::shared_ptr<Utils::Cell> nextCell = GetCellTowardsDirection(currentSolveCell, direction);
 
 			if (!Utils::IsPassedEntrance(passedEntrances, nextCell)) {
 				unpassedDirections.push_back(direction);
@@ -298,9 +333,12 @@ void Maze::UpdateSolving()
 			/* Select any entrance with the fewest passed */
 			int minPassCount = INT_MAX;
 			std::vector<Utils::Direction> leastPassedDirections;
+
 			for (const auto& direction : movableDirections) {
-				std::shared_ptr<Utils::Cell> nextCell = grid[currentSolveCell->y + direction.second][currentSolveCell->x + direction.first];
+				std::shared_ptr<Utils::Cell> nextCell = GetCellTowardsDirection(currentSolveCell, direction);
+
 				int passCount = Utils::GetPassCount(passedEntrances, nextCell);
+				
 				if (passCount < minPassCount) {
 					minPassCount = passCount;
 					leastPassedDirections.clear();
@@ -317,7 +355,7 @@ void Maze::UpdateSolving()
 			}
 		}
 
-		std::shared_ptr<Utils::Cell> nextCell = grid[currentSolveCell->y + nextDirection.second][currentSolveCell->x + nextDirection.first];
+		std::shared_ptr<Utils::Cell> nextCell = GetCellTowardsDirection(currentSolveCell, nextDirection);
 
 		Utils::PassOnEntrance(passedEntrances, nextCell);
 	}
@@ -326,12 +364,11 @@ void Maze::UpdateSolving()
 
 	/* Mode the current cell */
 	if (movable) {
-
 		/* To prevent wrong direction selection in completion phase */
 		if (currentSolveCell == solveStartCell)
 			startDirection = currentDirection;
 
-		currentSolveCell = grid[currentSolveCell->y + currentDirection.second][currentSolveCell->x + currentDirection.first];
+		currentSolveCell = GetCellTowardsDirection(currentSolveCell, currentDirection);
 	}
 
 	/* If we reach the finish */
@@ -346,15 +383,7 @@ void Maze::UpdateSolving()
 void Maze::UpdateCompletion()
 {
 	/* Get movable direction of the current cell */
-	std::vector<Utils::Direction> movableDirections;
-
-	for (int i = 0; i < 4; ++i) {
-		int nextX = currentCompleteCell->x + Utils::GetDirection(i).first;
-		int nextY = currentCompleteCell->y + Utils::GetDirection(i).second;
-		if (nextX >= 0 && nextX < width && nextY >= 0 && nextY < height && !grid[nextY][nextX]->isWall) {
-			movableDirections.push_back(Utils::GetDirection(i));
-		}
-	}
+	std::vector<Utils::Direction> movableDirections = GetMovableDirections(currentCompleteCell);
 
 	Utils::Direction nextDirection{};
 
@@ -380,7 +409,7 @@ void Maze::UpdateCompletion()
 
 		for (const auto& direction : movableDirections) {
 			/* Get next cell in the direcion */
-			std::shared_ptr<Utils::Cell> nextCell = grid[currentCompleteCell->y + direction.second][currentCompleteCell->x + direction.first];
+			std::shared_ptr<Utils::Cell> nextCell = GetCellTowardsDirection(currentCompleteCell, direction);
 			if (Utils::IsOncePassedEntrance(passedEntrances, nextCell)) {
 				/* We will move on this direction */
 				nextDirection = direction;
@@ -392,7 +421,7 @@ void Maze::UpdateCompletion()
 
 	currentCompletionDirection = nextDirection;
 
-	currentCompleteCell = grid[currentCompleteCell->y + currentCompletionDirection.second][currentCompleteCell->x + currentCompletionDirection.first];
+	currentCompleteCell = GetCellTowardsDirection(currentCompleteCell, currentCompletionDirection);
 
 	/* We have reached to end */
 	if (currentCompleteCell == solveEndCell) {
@@ -425,15 +454,10 @@ void Maze::CompleteMaze()
 	completionComplete = false;
 	solvingComplete = false;
 
-	/* Get the entrances that only passed once */
-	oncePassedEntrances = Utils::GetOncePassedEntrances(passedEntrances);
-	inJunction = true; //Think like the start point is a junction too
-
 	std::cout << "Maze Completion Started from (" << solveStartCell->x << ", " << solveStartCell->y << ") to (" << solveEndCell->x << ", " << solveEndCell->y << ")\n";
 
 	/* Start solve path */
 	currentCompletionDirection = startDirection;
-	//currentCompleteCell = grid[solveStartCell->y + currentCompletionDirection.second][solveStartCell->x + currentCompletionDirection.first];
 	currentCompleteCell = solveStartCell;
 }
 
@@ -457,9 +481,9 @@ void Maze::DrawMaze(unsigned int shaderProgram, int cameraX, int cameraY)
 {
 	for(int y = 0; y < height; ++y) {
 		for(int x = 0; x < width; ++x) {
-			std::shared_ptr<Utils::Cell> cell = grid[y][x];
+			std::shared_ptr<Utils::Cell> cell = GetCellFromXY(x, y);
 			if(cell->isWall) {
-				DrawCell(shaderProgram, cameraX, cameraY, 1.0f, 1.0f, 1.0f, grid[y][x]);
+				DrawCell(shaderProgram, cameraX, cameraY, 1.0f, 1.0f, 1.0f, cell);
 			}
 		}
 	}
@@ -470,11 +494,13 @@ void Maze::DrawMaze(unsigned int shaderProgram, int cameraX, int cameraY)
 	if(selectingCells && pointing)
 		DrawCell(shaderProgram, cameraX, cameraY, 1.0f, 0.0f, 0.0f, pointedCell);
 
-	for (const auto& passedEntrance : passedEntrances) {
-		if (passedEntrance->passCount == 1)
-			DrawCell(shaderProgram, cameraX, cameraY, 0.0f, 1.0f, 1.0f, passedEntrance->cell);
-		else if (passedEntrance->passCount == 2)
-			DrawCell(shaderProgram, cameraX, cameraY, 0.5f, 0.5f, 0.5f, passedEntrance->cell);
+	if (solving) {
+		for (const auto& passedEntrance : passedEntrances) {
+			if (passedEntrance->passCount == 1)
+				DrawCell(shaderProgram, cameraX, cameraY, 0.0f, 1.0f, 1.0f, passedEntrance->cell);
+			else if (passedEntrance->passCount >= 2)
+				DrawCell(shaderProgram, cameraX, cameraY, 0.5f, 0.5f, 0.5f, passedEntrance->cell);
+		}
 	}
 
 	for (const auto& solvePathCell : solvePath) {
@@ -549,7 +575,6 @@ void Maze::InitializeGrid()
 	solvePath.clear();
 	completing = false;
 	completionComplete = false;
-	oncePassedEntrances.clear();
 	
 	/* Allocate memory for grid */
 	grid.resize(height);
