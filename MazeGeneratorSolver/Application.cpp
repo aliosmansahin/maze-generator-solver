@@ -245,7 +245,7 @@ void Application::HandlePhaseGeneration()
     }
 
     /* Start to generate */
-	maze->GenerateMaze();
+	maze->GenerateMaze(cameraX, cameraY, cameraZoom);
 }
 
 void Application::HandlePhaseCellSelection()

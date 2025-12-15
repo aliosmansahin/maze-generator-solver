@@ -36,7 +36,7 @@ public:
 		CleanupGrid();
 	}
 
-	void GenerateMaze();
+	void GenerateMaze(float& cameraXAfterSet, float& cameraYAfterSet, float& cameraZoomAfterSet);
 	void StartSelection();
 	void SolveMaze();
 	void CompleteMaze();

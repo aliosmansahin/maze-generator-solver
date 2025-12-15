@@ -1,10 +1,25 @@
 #include "Maze.h"
 
-void Maze::GenerateMaze()
+void Maze::GenerateMaze(float& cameraXAfterSet, float& cameraYAfterSet, float& cameraZoomAfterSet)
 {
 	/* Initialize parameters */
 	generationComplete = false;
 	generating = true;
+
+	/* Set camera position and zoom to fit maze into screen without any navigation process */
+	float mazeWorldWidth = cellHalfSize * 2.0f * width;
+	float mazeWorldHeight = cellHalfSize * 2.0f * height;
+
+	float zoomX = WINDOW_WIDTH / mazeWorldWidth * 0.8f;
+	float zoomY = WINDOW_HEIGHT / mazeWorldHeight * 0.8f;
+
+	cameraZoomAfterSet = (zoomX < zoomY) ? zoomX : zoomY;
+
+	float mazeCenterX = mazeWorldWidth / 2.0f - cellHalfSize;
+	float mazeCenterY = mazeWorldHeight / 2.0f - cellHalfSize;
+
+	cameraXAfterSet = mazeCenterX;
+	cameraYAfterSet = mazeCenterY;
 
 	srand(static_cast<unsigned int>(time(nullptr)));
 
