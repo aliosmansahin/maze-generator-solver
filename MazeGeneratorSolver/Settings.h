@@ -22,6 +22,9 @@ Change these values to modify the window dimensions and title used in the applic
 /* Change this value to set simulation interval, for example, it updates every 0.01 seconds by default */
 #define SIMULATION_INTERVAL 0.01
 
+/* Change this value to set camera sensitivity */
+#define CAMERA_SENSITIVITY 1
+
 /* ------- DEBUG ------- */
 
 //#define DEBUG_CLEAR_COLOR // Uncomment this line to enable debug clear color (red) during rendering.

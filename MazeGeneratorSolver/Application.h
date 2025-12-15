@@ -64,10 +64,13 @@ private:
 	void UpdatePhase();
 	bool IsCurrentPhaseCompleted();
 
+	void UpdateCameraPosition();
+	void UpdateCameraZoom();
 
 	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 	static void MousePositionCallback(GLFWwindow* window, double xpos, double ypos);
+	static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 private:
 	GLFWwindow* window = nullptr;
@@ -85,8 +88,20 @@ private:
 
 	static bool spacePressed;
 	static bool leftMouseClicked;
+	static bool rightMousePressed;
+	static bool mouseWheelUp;
+	static bool mouseWheelDown;
 	static int mouseX;
 	static int mouseY;
+	int lastMouseX = 0;
+	int lastMouseY = 0;
+
+	bool rightFirstPress = false;
+
+	float cameraX = 0.0f;
+	float cameraY = 0.0f;
+
+	float cameraZoom = 1.0f;
 
 	float lastMazeUpdateTime = 0.0f;
 	float mazeUpdateInterval = SIMULATION_INTERVAL;

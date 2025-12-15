@@ -138,17 +138,15 @@ void Maze::UpdateGeneration()
 	}
 }
 
-void Maze::UpdateSelection(int mouseX, int mouseY, bool leftMouseClicked)
+void Maze::UpdateSelection(int mouseX, int mouseY, float cameraX, float cameraY, float cameraZoom, bool leftMouseClicked)
 {
-	/* Use mouse position to find pointed cell */
-
 	/* Convert mouse coordinates into our coordinate system */
-	mouseY = WINDOW_HEIGHT - mouseY; // Invert Y axis
-	mouseX -= WINDOW_WIDTH / 2;
-	mouseY -= WINDOW_HEIGHT / 2;
+	float worldMouseX = mouseX / cameraZoom + cameraX;
+	float worldMouseY = mouseY / cameraZoom + cameraY;
 
-	int cellX = (int)((mouseX + cellHalfSize) / (cellHalfSize * 2.0f) + width / 2.0f);
-	int cellY = (int)((mouseY + cellHalfSize) / (cellHalfSize * 2.0f) + height / 2.0f);
+	/* Use world mouse position to find pointed cell */
+	int cellX = (int)((worldMouseX + cellHalfSize) / (cellHalfSize * 2.0f));
+	int cellY = (int)((worldMouseY + cellHalfSize) / (cellHalfSize * 2.0f));
 
 	bool mouseInsideMaze = cellX >= 0 && cellX < width && cellY >= 0 && cellY < height;
 
@@ -421,13 +419,13 @@ void Maze::CompleteMaze()
 	currentCompleteCell = solveStartCell;
 }
 
-void Maze::UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked)
+void Maze::UpdateMaze(int mouseX, int mouseY, float cameraX, float cameraY, float cameraZoom, bool leftMouseClicked)
 {
 	if(generating && !generationComplete) {
 		UpdateGeneration();
 	}
 	if (selectingCells) {
-		UpdateSelection(mouseX, mouseY, leftMouseClicked);
+		UpdateSelection(mouseX, mouseY, cameraX, cameraY, cameraZoom, leftMouseClicked);
 	}
 	if(solving && !solvingComplete) {
 		UpdateSolving();
@@ -437,45 +435,45 @@ void Maze::UpdateMaze(int mouseX, int mouseY, bool leftMouseClicked)
 	}
 }
 
-void Maze::DrawMaze(unsigned int shaderProgram)
+void Maze::DrawMaze(unsigned int shaderProgram, int cameraX, int cameraY)
 {
 	for(int y = 0; y < height; ++y) {
 		for(int x = 0; x < width; ++x) {
 			std::shared_ptr<Utils::Cell> cell = grid[y][x];
 			if(cell->isWall) {
-				DrawCell(shaderProgram, 1.0f, 1.0f, 1.0f, grid[y][x]);
+				DrawCell(shaderProgram, cameraX, cameraY, 1.0f, 1.0f, 1.0f, grid[y][x]);
 			}
 		}
 	}
 
 	if(!generationStack.empty())
-		DrawCell(shaderProgram, 0.0f, 1.0f, 0.0f, generationStack.back());
+		DrawCell(shaderProgram, cameraX, cameraY, 0.0f, 1.0f, 0.0f, generationStack.back());
 
 	if(selectingCells && pointing)
-		DrawCell(shaderProgram, 1.0f, 0.0f, 0.0f, pointedCell);
+		DrawCell(shaderProgram, cameraX, cameraY, 1.0f, 0.0f, 0.0f, pointedCell);
 
 	for (const auto& passedEntrance : passedEntrances) {
 		if (passedEntrance->passCount == 1)
-			DrawCell(shaderProgram, 0.0f, 1.0f, 1.0f, passedEntrance->cell);
+			DrawCell(shaderProgram, cameraX, cameraY, 0.0f, 1.0f, 1.0f, passedEntrance->cell);
 		else if (passedEntrance->passCount == 2)
-			DrawCell(shaderProgram, 0.5f, 0.5f, 0.5f, passedEntrance->cell);
+			DrawCell(shaderProgram, cameraX, cameraY, 0.5f, 0.5f, 0.5f, passedEntrance->cell);
 	}
 
 	for (const auto& solvePathCell : solvePath) {
-		DrawCell(shaderProgram, 0.0f, 0.0f, 0.7f, solvePathCell);
+		DrawCell(shaderProgram, cameraX, cameraY, 0.0f, 0.0f, 0.7f, solvePathCell);
 	}
 
 	if(hasSolveStartCell)
-		DrawCell(shaderProgram, 0.0f, 0.0f, 1.0f, solveStartCell);
+		DrawCell(shaderProgram, cameraX, cameraY, 0.0f, 0.0f, 1.0f, solveStartCell);
 
 	if (hasSolveEndCell)
-		DrawCell(shaderProgram, 1.0f, 1.0f, 0.0f, solveEndCell);
+		DrawCell(shaderProgram, cameraX, cameraY, 1.0f, 1.0f, 0.0f, solveEndCell);
 
 	if (completing)
-		DrawCell(shaderProgram, 0.5f, 0.0f, 0.0f, currentCompleteCell);
+		DrawCell(shaderProgram, cameraX, cameraY, 0.5f, 0.0f, 0.0f, currentCompleteCell);
 
 	if (solving)
-		DrawCell(shaderProgram, 1.0f, 0.0f, 1.0f, currentSolveCell);
+		DrawCell(shaderProgram, cameraX, cameraY, 1.0f, 0.0f, 1.0f, currentSolveCell);
 }
 
 /*
@@ -483,16 +481,16 @@ PURPOSE: Draws a single cell at given position with specified color.
 	This function sends the color of the cell to the fragment shader
 	to avoid creating multiple VAOs for different colors.
 */
-void Maze::DrawCell(unsigned int shaderProgram, float r, float g, float b, std::shared_ptr<Utils::Cell> cell)
+void Maze::DrawCell(unsigned int shaderProgram, int cameraX, int cameraY, float r, float g, float b, std::shared_ptr<Utils::Cell> cell)
 {
 	/* Send translation matrix */
-	int translateX = cell->x * cellHalfSize * 2 - width * cellHalfSize;
-	int translateY = cell->y * cellHalfSize * 2 - height * cellHalfSize;
+	int translateX = cell->x * cellHalfSize * 2;
+	int translateY = cell->y * cellHalfSize * 2;
 	float translationMatrix[16] = {
 		1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
-		(float)translateX, (float)translateY, 0, 1
+		(float)(translateX - cameraX), (float)(translateY - cameraY), 0, 1
 	};
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "translation"), 1, GL_FALSE, translationMatrix);
 

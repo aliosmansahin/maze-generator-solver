@@ -2,6 +2,9 @@
 
 bool Application::spacePressed = false;
 bool Application::leftMouseClicked = false;
+bool Application::rightMousePressed = false;
+bool Application::mouseWheelUp = false;
+bool Application::mouseWheelDown = false;
 int Application::mouseX = 0;
 int Application::mouseY = 0;
 
@@ -76,10 +79,11 @@ void Application::InitializeShaders()
 
         uniform mat4 projection;
         uniform mat4 translation;
+        uniform mat4 scale;
 
         void main()
         {
-            gl_Position = projection * translation * vec4(aPos, 0.0, 1.0);
+            gl_Position = projection * scale * translation * vec4(aPos, 0.0, 1.0);
         }
     )";
 
@@ -130,6 +134,7 @@ void Application::SetGLFWCallbacks()
     glfwSetKeyCallback(window, &Application::KeyCallback);
     glfwSetMouseButtonCallback(window, &Application::MouseButtonCallback);
     glfwSetCursorPosCallback(window, &Application::MousePositionCallback);
+    glfwSetScrollCallback(window, &Application::ScrollCallback);
 }
 
 void Application::Update()
@@ -138,6 +143,12 @@ void Application::Update()
     if (spacePressed && phaseCompleted) {
         UpdatePhase();
     }
+    if (rightMousePressed) {
+        UpdateCameraPosition();
+    }
+    else
+        rightFirstPress = true;
+    UpdateCameraZoom();
 
     /* We update maze only each <mazeUpdateInterval> seconds */
     bool updateMaze = false;
@@ -164,7 +175,7 @@ void Application::Update()
 		leftMouseClickedLocal = true;
 
     if (maze && updateMaze) {
-        maze->UpdateMaze(mouseX, mouseY, leftMouseClickedLocal);
+        maze->UpdateMaze(mouseX, mouseY, cameraX, cameraY, cameraZoom, leftMouseClickedLocal);
         if (IsCurrentPhaseCompleted()) {
             if (maze->IsSolvingComplete()) {
                 UpdatePhase();
@@ -179,6 +190,8 @@ void Application::Update()
 
     spacePressed = false;
     leftMouseClicked = false;
+    mouseWheelUp = false;
+    mouseWheelDown = false;
 }
 
 void Application::Render()
@@ -201,8 +214,17 @@ void Application::Render()
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, orthoMatrix);
 
+    float scaleMatrix[16] = {
+        cameraZoom, 0.0f, 0.0f, 0.0f,
+        0.0f, cameraZoom, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "scale"), 1, GL_FALSE, scaleMatrix);
+
     if(maze)
-		maze->DrawMaze(shaderProgram);
+		maze->DrawMaze(shaderProgram, cameraX, cameraY);
 }
 
 void Application::HandlePhaseIdle()
@@ -290,6 +312,46 @@ bool Application::IsCurrentPhaseCompleted()
         (currentPhase == Utils::Phase::Completed && maze->IsCompletionComplete());
 }
 
+void Application::UpdateCameraPosition()
+{
+    if (rightFirstPress) {
+        rightFirstPress = false;
+
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
+    }
+
+    int deltaMouseX = mouseX - lastMouseX;
+    int deltaMouseY = mouseY - lastMouseY;
+
+    cameraX -= deltaMouseX * CAMERA_SENSITIVITY / cameraZoom;
+    cameraY -= deltaMouseY * CAMERA_SENSITIVITY / cameraZoom;
+
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
+}
+
+void Application::UpdateCameraZoom()
+{
+    float oldZoom = cameraZoom;
+
+    // Update zoom
+    if (mouseWheelUp) {
+        cameraZoom += 0.1f;
+    }
+    if (mouseWheelDown) {
+        cameraZoom -= 0.1f;
+        if (cameraZoom <= 0.1f)
+            cameraZoom = 0.1f;
+    }
+
+    // Correct the camera
+    if (cameraZoom != oldZoom) {
+        cameraX += (mouseX / oldZoom) - (mouseX / cameraZoom);
+        cameraY += (mouseY / oldZoom) - (mouseY / cameraZoom);
+    }
+}
+
 void Application::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
@@ -300,10 +362,22 @@ void Application::MouseButtonCallback(GLFWwindow* window, int button, int action
 {
     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 		leftMouseClicked = true;
+
+    rightMousePressed = (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
 }
 
 void Application::MousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
-	mouseX = (double)xpos;
-	mouseY = (double)ypos;
+	mouseX = xpos - WINDOW_WIDTH / 2.0f;
+	mouseY = WINDOW_HEIGHT - ypos - WINDOW_HEIGHT / 2.0f;
+}
+
+void Application::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if (yoffset > 0) {
+        mouseWheelUp = true;
+    }
+    else if (yoffset < 0) {
+        mouseWheelDown = true;
+    }
 }
