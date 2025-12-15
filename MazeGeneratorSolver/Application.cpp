@@ -36,6 +36,7 @@ void Application::Initialize()
         std::cerr << "Failed to initialize GLFW" << std::endl;
         throw std::runtime_error("GLFW initialization failed.");
 	}
+    glfwWindowHint(GLFW_RESIZABLE, false);
 
 	CreateWindow();
 
