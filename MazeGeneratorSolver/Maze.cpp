@@ -19,13 +19,13 @@ void Maze::GenerateMaze(float& cameraXAfterSet, float& cameraYAfterSet, float& c
 
 	std::string mazeSeedStr = "";
 
-	for (int i = 0; i < MAZE_SEED_RIDIG_COUNT; ++i) {
-		int mazeRigid = rand() % MAZE_SEED_RIDIG_COUNT;
+	for (int i = 0; i < MAZE_SEED_RIGID_COUNT; ++i) {
+		int mazeRigid = rand() % MAZE_SEED_RIGID_COUNT;
 
 		mazeSeedStr += std::to_string(mazeRigid);
 	}
 
-	long long mazeSeed = std::stoll(mazeSeedStr);
+	unsigned int mazeSeed = (unsigned int)std::stoul(mazeSeedStr);
 
 	srand(mazeSeed);
 
@@ -213,7 +213,10 @@ void Maze::UpdateGeneration()
 		generating = false;
 
 		std::cout << "Maze Generation Complete!\n";
+
+#ifdef DEBUG_PRINT_MAZE_INTO_CONSOLE
 		PrintMaze();
+#endif
 	}
 }
 

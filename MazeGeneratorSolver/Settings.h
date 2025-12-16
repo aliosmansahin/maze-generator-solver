@@ -36,15 +36,20 @@ WARNING: Use odd numbers
 Change this value to generate maze from a seed.
 If it is commented, the seed will be generated randomly
 */
-#define MAZE_SEED 1167719117
+//#define MAZE_SEED 0
 
 /*
 Change this value to 
 WARNING: Works only if maze is being generated randomly,
 	DON'T UNCOMMENT THIS IF YOU ARE USING RANDOM GENERATION
+
+WARNING: Making it more than 9 might make app unstable,
+	because, seed is an unsigned int, and max value of it is 4294967295 which is a 10 digid value,
+	which can be fault as an overflow
 */
-#define MAZE_SEED_RIDIG_COUNT 10
+#define MAZE_SEED_RIGID_COUNT 9
 
 /* ------- DEBUG ------- */
 
 //#define DEBUG_CLEAR_COLOR // Uncomment this line to enable debug clear color (red) during rendering.
+//#define DEBUG_PRINT_MAZE_INTO_CONSOLE // Uncomment this line to print maze into console after generation (might not work with large mazes)
