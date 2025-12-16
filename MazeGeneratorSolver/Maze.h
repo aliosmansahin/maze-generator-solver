@@ -20,6 +20,7 @@ Date: December 7, 2025
 #include <time.h>
 #include <iostream>
 #include <algorithm>
+#include <string>
 
 class Maze
 {

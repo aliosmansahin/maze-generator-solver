@@ -8,7 +8,29 @@ void Maze::GenerateMaze(float& cameraXAfterSet, float& cameraYAfterSet, float& c
 
 	SetCameraToFitMazeIntoScreen(cameraXAfterSet, cameraYAfterSet, cameraZoomAfterSet);
 
+	/* Generate or use a maze seed */
+#ifdef MAZE_SEED
+	srand(MAZE_SEED);
+
+	std::cout << "Using pre-entered maze seed: " << MAZE_SEED << std::endl;
+#else
+	/* Generate 10 rigid maze seed */
 	srand(static_cast<unsigned int>(time(nullptr)));
+
+	std::string mazeSeedStr = "";
+
+	for (int i = 0; i < MAZE_SEED_RIDIG_COUNT; ++i) {
+		int mazeRigid = rand() % MAZE_SEED_RIDIG_COUNT;
+
+		mazeSeedStr += std::to_string(mazeRigid);
+	}
+
+	long long mazeSeed = std::stoll(mazeSeedStr);
+
+	srand(mazeSeed);
+
+	std::cout << "Maze seed: " << mazeSeed << std::endl;
+#endif
 
 	do {
 		startCell = GetCellFromXY(rand() % height, rand() % width);
