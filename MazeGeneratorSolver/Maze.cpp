@@ -214,7 +214,7 @@ void Maze::UpdateGeneration()
 
 		std::cout << "Maze Generation Complete!\n";
 
-#ifdef DEBUG_PRINT_MAZE_INTO_CONSOLE
+#ifdef DEBUG_PRINT_MAZE_ON_CONSOLE
 		PrintMaze();
 #endif
 	}

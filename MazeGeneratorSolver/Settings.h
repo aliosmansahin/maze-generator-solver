@@ -52,4 +52,4 @@ WARNING: Making it more than 9 might make app unstable,
 /* ------- DEBUG ------- */
 
 //#define DEBUG_CLEAR_COLOR // Uncomment this line to enable debug clear color (red) during rendering.
-//#define DEBUG_PRINT_MAZE_INTO_CONSOLE // Uncomment this line to print maze into console after generation (might not work with large mazes)
+//#define DEBUG_PRINT_MAZE_ON_CONSOLE // Uncomment this line to print maze into console after generation (might not work with large mazes)
