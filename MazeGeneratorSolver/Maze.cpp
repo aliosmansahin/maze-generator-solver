@@ -504,7 +504,7 @@ void Maze::DrawMaze(unsigned int shaderProgram, float cameraX, float cameraY)
 	}
 
 	for (const auto& solvePathCell : solvePath) {
-		DrawCell(shaderProgram, cameraX, cameraY, 0.0f, 0.0f, 0.7f, solvePathCell);
+		DrawCell(shaderProgram, cameraX, cameraY, 0.0f, 0.7f, 0.7f, solvePathCell);
 	}
 
 	if(hasSolveStartCell)
